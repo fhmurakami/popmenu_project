@@ -4,12 +4,12 @@ class MenusController < ApplicationController
   # GET /menus or /menus.json
   def index
     @menus = Menu.all
-    render json: @menus
+    render json: @menus.to_json(include: :menu_items)
   end
 
   # GET /menus/1 or /menus/1.json
   def show
-    render json: @menu
+    render json: @menu.to_json(include: :menu_items)
   end
 
   # POST /menus or /menus.json
@@ -17,7 +17,7 @@ class MenusController < ApplicationController
     @menu = Menu.new(menu_params)
 
     if @menu.save
-      render json: @menu, status: :created
+      render json: @menu.to_json(include: :menu_items), status: :created
     else
       render json: { errors: @menu.errors }, status: :unprocessable_entity
     end
@@ -26,7 +26,7 @@ class MenusController < ApplicationController
   # PATCH/PUT /menus/1 or /menus/1.json
   def update
     if @menu.update(menu_params)
-      render json: @menu, status: :ok
+      render json: @menu.to_json(include: :menu_items), status: :ok
     else
       render json: { errors: @menu.errors }, status: :unprocessable_entity
     end

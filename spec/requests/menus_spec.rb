@@ -34,15 +34,36 @@ RSpec.describe "/menus", type: :request do
     end
 
     context "when menus exist" do
-      before do
-        create_list(:menu, 3)
-      end
-
       it "renders a successful response" do
+        create_list(:menu, 3)
         get menus_url
 
         expect(response).to be_successful
         expect(JSON.parse(response.body).size).to eq(3)
+      end
+
+      context "with menu items" do
+        it "renders a successful response with menu items" do
+          menu = create(:menu)
+          create_list(:menu_item, 2, menu: menu)
+          create(
+            :menu_item,
+            menu: menu,
+            name: "Special Item",
+            price: 99.99,
+          )
+          get menus_url
+
+          parsed_menu_list = JSON.parse(response.body)
+          parsed_menu_items = parsed_menu_list.first["menu_items"]
+
+          expect(response).to be_successful
+          expect(parsed_menu_list.size).to eq(1)
+          expect(parsed_menu_items.size).to eq(3)
+          expect(parsed_menu_items.last["name"]).to eq("Special Item")
+          expect(parsed_menu_items.last["price"]).to eq("99.99")
+          expect(parsed_menu_items.last["menu_id"]).to eq(menu.id)
+        end
       end
     end
   end
@@ -62,9 +83,34 @@ RSpec.describe "/menus", type: :request do
         get menu_url(menu)
         expect(response).to be_successful
 
-        json = JSON.parse(response.body)
-        expect(json["id"]).to eq(menu.id)
-        expect(json["name"]).to eq(menu.name)
+        parsed_menu = JSON.parse(response.body)
+        expect(parsed_menu["id"]).to eq(menu.id)
+        expect(parsed_menu["name"]).to eq(menu.name)
+      end
+
+      context "with menu items" do
+        it "renders a successful response with menu items" do
+          menu = create(:menu)
+          create_list(:menu_item, 2, menu: menu)
+          create(
+            :menu_item,
+            menu: menu,
+            name: "Special Item",
+            price: 99.99,
+          )
+          get menu_url(menu)
+
+          parsed_menu = JSON.parse(response.body)
+
+          parsed_menu_items = parsed_menu["menu_items"]
+
+          expect(response).to be_successful
+          expect(parsed_menu).to be_an_instance_of(Hash)
+          expect(parsed_menu_items.size).to eq(3)
+          expect(parsed_menu_items.last["name"]).to eq("Special Item")
+          expect(parsed_menu_items.last["price"]).to eq("99.99")
+          expect(parsed_menu_items.last["menu_id"]).to eq(menu.id)
+        end
       end
     end
   end
@@ -124,6 +170,20 @@ RSpec.describe "/menus", type: :request do
         menu = create(:menu, valid_attributes)
         patch menu_url(menu), params: { menu: new_attributes }
         expect(response).to have_http_status(:ok)
+      end
+
+      context "when the menu has associated menu items" do
+        it "maintains the associated menu items" do
+          menu = create(:menu, valid_attributes)
+          menu_items = create_list(:menu_item, 3, menu: menu)
+
+          patch menu_url(menu), params: { menu: new_attributes }
+          menu.reload
+
+          expect(menu.name).to eq("Updated Menu")
+          expect(menu.menu_items.count).to eq(3)
+          expect(menu.menu_items.pluck(:id)).to match_array(menu_items.pluck(:id))
+        end
       end
     end
 
