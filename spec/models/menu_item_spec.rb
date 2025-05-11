@@ -98,5 +98,13 @@ RSpec.describe MenuItem, type: :model do
       menu_item = build(:menu_item, menu: nil)
       expect(menu_item).not_to be_valid
     end
+
+    it "allows menu items to be destroyed independently of the menu" do
+      menu = create(:menu, name: "Dinner Menu")
+      menu_item = create(:menu_item, menu: menu, name: "Steak", price: 15.99)
+
+      expect { menu_item.destroy }.to change(described_class, :count).by(-1)
+      expect(Menu.exists?(menu.id)).to be true
+    end
   end
 end

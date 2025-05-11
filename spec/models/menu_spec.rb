@@ -24,13 +24,5 @@ RSpec.describe Menu, type: :model do
 
       expect { menu.destroy }.to change(MenuItem, :count).by(-1)
     end
-
-    it "allows menu items to be destroyed independently of the menu" do
-      menu = described_class.create(name: "Dinner Menu")
-      menu_item = menu.menu_items.create(name: "Steak", price: 15.99)
-
-      expect { menu_item.destroy }.to change(MenuItem, :count).by(-1)
-      expect(described_class.exists?(menu.id)).to be true
-    end
   end
 end
