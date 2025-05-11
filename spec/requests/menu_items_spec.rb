@@ -52,7 +52,7 @@ RSpec.describe "/menu_items", type: :request do
   describe "GET /index" do
     context "when no menu item exist" do
       it "returns an empty array" do
-        get menu_items_url, headers: valid_headers, as: :json
+        get menu_items_url(menu), headers: valid_headers, as: :json
         expect(response).to be_successful
         expect(JSON.parse(response.body)).to be_empty
       end
@@ -63,7 +63,7 @@ RSpec.describe "/menu_items", type: :request do
         menu = create(:menu)
         create_list(:menu_item, 3, menu: menu)
 
-        get menu_items_url, headers: valid_headers, as: :json
+        get menu_items_url(menu), headers: valid_headers, as: :json
 
         expect(response).to be_successful
         expect(JSON.parse(response.body).size).to eq(3)
@@ -74,7 +74,7 @@ RSpec.describe "/menu_items", type: :request do
   describe "GET /show" do
     context "when the menu item does not exist" do
       it "returns a not found response (404)" do
-        get menu_item_url(id: -1), as: :json
+        get menu_item_url(menu, id: -1), as: :json
         expect(response).to have_http_status(:not_found)
       end
     end
@@ -83,7 +83,7 @@ RSpec.describe "/menu_items", type: :request do
       it "returns a successful response" do
       menu_item = create(:menu_item, menu: menu)
 
-      get menu_item_url(menu_item), as: :json
+      get menu_item_url(menu, menu_item), as: :json
 
       expect(response).to be_successful
       end
@@ -91,7 +91,7 @@ RSpec.describe "/menu_items", type: :request do
       it "returns the menu item" do
         menu_item = create(:menu_item, menu: menu)
 
-        get menu_item_url(menu_item), as: :json
+        get menu_item_url(menu, menu_item), as: :json
 
         json = JSON.parse(response.body)
 
@@ -111,7 +111,7 @@ RSpec.describe "/menu_items", type: :request do
     context "with valid parameters" do
       it "creates a new MenuItem" do
         expect {
-          post menu_items_url,
+          post menu_items_url(menu),
                params: { menu_item: valid_attributes },
                headers: valid_headers,
                as: :json
@@ -119,7 +119,7 @@ RSpec.describe "/menu_items", type: :request do
       end
 
       it "renders a JSON response with the new menu_item" do
-        post menu_items_url,
+        post menu_items_url(menu),
              params: { menu_item: valid_attributes }, headers: valid_headers, as: :json
         expect(response).to have_http_status(:created)
         expect(response.content_type).to match(a_string_including("application/json"))
@@ -129,20 +129,20 @@ RSpec.describe "/menu_items", type: :request do
     context "with invalid parameters" do
       it "does not create a new MenuItem" do
         expect {
-          post menu_items_url,
+          post menu_items_url(menu),
                params: { menu_item: invalid_attributes }, as: :json
         }.not_to change(MenuItem, :count)
       end
 
       it "renders a JSON response with errors for the new menu_item" do
-        post menu_items_url,
+        post menu_items_url(menu),
              params: { menu_item: invalid_attributes }, headers: valid_headers, as: :json
         expect(response).to have_http_status(:unprocessable_entity)
         expect(response.content_type).to match(a_string_including("application/json"))
       end
 
       it "returns error messages" do
-        post menu_items_url,
+        post menu_items_url(menu),
              params: { menu_item: invalid_attributes }, headers: valid_headers, as: :json
 
         errors = JSON.parse(response.body)["errors"]
@@ -176,7 +176,7 @@ RSpec.describe "/menu_items", type: :request do
       it "updates the requested menu_item" do
         menu_item = create(:menu_item, menu: menu)
 
-        patch menu_item_url(menu_item),
+        patch menu_item_url(menu, menu_item),
               params: { menu_item: new_attributes },
               headers: valid_headers,
               as: :json
@@ -193,7 +193,7 @@ RSpec.describe "/menu_items", type: :request do
 
       it "renders a JSON response with the menu_item" do
         menu_item = MenuItem.create! valid_attributes
-        patch menu_item_url(menu_item),
+        patch menu_item_url(menu, menu_item),
               params: { menu_item: new_attributes }, headers: valid_headers, as: :json
         expect(response).to have_http_status(:ok)
         expect(response.content_type).to match(a_string_including("application/json"))
@@ -203,7 +203,7 @@ RSpec.describe "/menu_items", type: :request do
     context "with invalid parameters" do
       it "renders a JSON response with errors for the menu_item" do
         menu_item = MenuItem.create! valid_attributes
-        patch menu_item_url(menu_item),
+        patch menu_item_url(menu, menu_item),
               params: { menu_item: invalid_attributes }, headers: valid_headers, as: :json
         expect(response).to have_http_status(:unprocessable_entity)
         expect(response.content_type).to match(a_string_including("application/json"))
@@ -215,7 +215,7 @@ RSpec.describe "/menu_items", type: :request do
     it "destroys the requested menu_item" do
       menu_item = create(:menu_item, menu: menu)
       expect {
-        delete menu_item_url(menu_item), headers: valid_headers, as: :json
+        delete menu_item_url(menu, menu_item), headers: valid_headers, as: :json
       }.to change(MenuItem, :count).by(-1)
       expect(MenuItem.find_by(id: menu_item.id)).to be_nil
     end
