@@ -27,7 +27,7 @@ RSpec.describe "/menus", type: :request do
   describe "GET /index" do
     context "when no menus exist" do
       it "returns an empty array" do
-        get menus_url
+        get api_v1_menus_url
         expect(response).to be_successful
         expect(JSON.parse(response.body)).to be_empty
       end
@@ -36,7 +36,7 @@ RSpec.describe "/menus", type: :request do
     context "when menus exist" do
       it "renders a successful response" do
         create_list(:menu, 3)
-        get menus_url
+        get api_v1_menus_url
 
         expect(response).to be_successful
         expect(JSON.parse(response.body).size).to eq(3)
@@ -52,7 +52,7 @@ RSpec.describe "/menus", type: :request do
             name: "Special Item",
             price: 99.99,
           )
-          get menus_url
+          get api_v1_menus_url
 
           parsed_menu_list = JSON.parse(response.body)
           parsed_menu_items = parsed_menu_list.first["menu_items"]
@@ -71,7 +71,7 @@ RSpec.describe "/menus", type: :request do
   describe "GET /show" do
     context "when menu does not exist" do
       it "returns not found (404)" do
-        get menu_url(0)
+        get api_v1_menu_url(0)
         expect(response).to have_http_status(:not_found)
       end
     end
@@ -80,7 +80,7 @@ RSpec.describe "/menus", type: :request do
       let(:menu) { create(:menu) }
 
       it "returns the menu" do
-        get menu_url(menu)
+        get api_v1_menu_url(menu)
         expect(response).to be_successful
 
         parsed_menu = JSON.parse(response.body)
@@ -98,7 +98,7 @@ RSpec.describe "/menus", type: :request do
             name: "Special Item",
             price: 99.99,
           )
-          get menu_url(menu)
+          get api_v1_menu_url(menu)
 
           parsed_menu = JSON.parse(response.body)
 
@@ -119,12 +119,12 @@ RSpec.describe "/menus", type: :request do
     context "with valid parameters" do
       it "creates a new Menu" do
         expect {
-          post menus_url, params: { menu: valid_attributes }
+          post api_v1_menus_url, params: { menu: valid_attributes }
         }.to change(Menu, :count).by(1)
       end
 
       it "returns created (201) status" do
-        post menus_url, params: { menu: valid_attributes }
+        post api_v1_menus_url, params: { menu: valid_attributes }
         expect(response).to have_http_status(:created)
       end
     end
@@ -132,17 +132,17 @@ RSpec.describe "/menus", type: :request do
     context "with invalid parameters" do
       it "does not create a new Menu" do
         expect {
-          post menus_url, params: { menu: invalid_attributes }
+          post api_v1_menus_url, params: { menu: invalid_attributes }
         }.not_to change(Menu, :count)
       end
 
       it "returns a response with unprocessable entity (422) status" do
-        post menus_url, params: { menu: invalid_attributes }
+        post api_v1_menus_url, params: { menu: invalid_attributes }
         expect(response).to have_http_status(:unprocessable_entity)
       end
 
       it "returns error messages" do
-        post menus_url, params: { menu: invalid_attributes }
+        post api_v1_menus_url, params: { menu: invalid_attributes }
 
         errors = JSON.parse(response.body)["errors"]
 
@@ -161,14 +161,14 @@ RSpec.describe "/menus", type: :request do
 
       it "updates the requested menu" do
         menu = create(:menu, valid_attributes)
-        patch menu_url(menu), params: { menu: new_attributes }
+        patch api_v1_menu_url(menu), params: { menu: new_attributes }
         menu.reload
         expect(menu.name).to eq("Updated Menu")
       end
 
       it "returns ok (200) status code" do
         menu = create(:menu, valid_attributes)
-        patch menu_url(menu), params: { menu: new_attributes }
+        patch api_v1_menu_url(menu), params: { menu: new_attributes }
         expect(response).to have_http_status(:ok)
       end
 
@@ -177,7 +177,7 @@ RSpec.describe "/menus", type: :request do
           menu = create(:menu, valid_attributes)
           menu_items = create_list(:menu_item, 3, menu: menu)
 
-          patch menu_url(menu), params: { menu: new_attributes }
+          patch api_v1_menu_url(menu), params: { menu: new_attributes }
           menu.reload
 
           expect(menu.name).to eq("Updated Menu")
@@ -193,7 +193,7 @@ RSpec.describe "/menus", type: :request do
       it "does not update the requested menu" do
         menu = create(:menu, valid_attributes)
         original_name = menu.name
-        patch menu_url(menu), params: { menu: invalid_attributes }
+        patch api_v1_menu_url(menu), params: { menu: invalid_attributes }
         menu.reload
         expect(menu.name).not_to eq("")
         expect(menu.name).to eq(original_name)
@@ -201,13 +201,13 @@ RSpec.describe "/menus", type: :request do
 
       it "returns unprocessable_entity (422) status code" do
         menu = create(:menu, valid_attributes)
-        patch menu_url(menu), params: { menu: invalid_attributes }
+        patch api_v1_menu_url(menu), params: { menu: invalid_attributes }
         expect(response).to have_http_status(:unprocessable_entity)
       end
 
       it "returns error messages" do
         menu = create(:menu, valid_attributes)
-        patch menu_url(menu), params: { menu: invalid_attributes }
+        patch api_v1_menu_url(menu), params: { menu: invalid_attributes }
 
         errors = JSON.parse(response.body)["errors"]
 
@@ -222,7 +222,7 @@ RSpec.describe "/menus", type: :request do
     it "destroys the requested menu" do
       menu = create(:menu, valid_attributes)
       expect {
-        delete menu_url(menu)
+        delete api_v1_menu_url(menu)
       }.to change(Menu, :count).by(-1)
       expect(Menu.find_by(id: menu.id)).to be_nil
     end
