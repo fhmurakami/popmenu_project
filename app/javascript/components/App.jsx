@@ -4,7 +4,6 @@ import Navbar from "./Navbar"
 import MenuList from "./MenuList"
 // import MenuDetail from "./MenuDetail"
 import MenuForm from "./MenuForm"
-import "../App.css"
 
 const App = () => {
 	return (
