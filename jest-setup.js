@@ -3,6 +3,8 @@
 // Import custom Jest matchers from @testing-library/jest-dom.
 // This provides matchers like `toBeInTheDocument()`, `toHaveTextContent()`, etc.
 import "@testing-library/jest-dom"
+import { TextEncoder, TextDecoder } from "util"
+import React from "react"
 
 // --- Other Global Test Setup (Optional) ---
 // You can add other global mocks or configurations here if needed.
@@ -12,3 +14,7 @@ import "@testing-library/jest-dom"
 //   setItem: jest.fn(),
 //   clear: jest.fn(),
 // };
+
+global.TextEncoder = TextEncoder
+global.TextDecoder = TextDecoder
+global.React = React

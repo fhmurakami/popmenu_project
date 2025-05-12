@@ -12,6 +12,11 @@ class Api::V1::MenusController < ApplicationController
     render json: @menu.to_json(include: :menu_items)
   end
 
+  def new
+    @menu = Menu.new
+    render json: @menu
+  end
+
   # POST /menus or /menus.json
   def create
     @menu = Menu.new(menu_params)
