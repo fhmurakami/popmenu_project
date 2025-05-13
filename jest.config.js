@@ -17,9 +17,8 @@ module.exports = {
 	setupFilesAfterEnv: ["<rootDir>/jest-setup.js"],
 
 	// How jest should transform files before running tests
-	// This tells jest to use `esbuild-jest` for .js, .jsx, .ts, .tsx files
 	transform: {
-		"^.+\\.(js|jsx|ts|tsx)$": ["esbuild-jest", { jsx: "automatic" }],
+		"^.+\\.(js|jsx|ts|tsx)$": "babel-jest",
 	},
 	transformIgnorePatterns: ["/node_modules/"],
 
