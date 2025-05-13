@@ -7,7 +7,8 @@ import App from "./components/App"
 
 document.addEventListener("DOMContentLoaded", () => {
 	const container = document.getElementById("react-app")
-	if (container) {
+	if (container && !container.dataset.reactInitialized) {
+		container.dataset.reactInitialized = "true"
 		const root = createRoot(container)
 		root.render(<App />)
 	}

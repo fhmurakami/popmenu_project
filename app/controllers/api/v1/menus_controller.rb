@@ -12,6 +12,11 @@ class Api::V1::MenusController < ApplicationController
     render json: @menu.to_json(include: :menu_items)
   end
 
+  def new
+    @menu = Menu.new
+    render json: @menu
+  end
+
   # POST /menus or /menus.json
   def create
     @menu = Menu.new(menu_params)
@@ -34,10 +39,10 @@ class Api::V1::MenusController < ApplicationController
 
   # DELETE /menus/1 or /menus/1.json
   def destroy
-    @menu.destroy!
-
-    respond_to do |format|
-      format.json { head :no_content }
+    if @menu.destroy
+      render json: { message: "Menu deleted successfully" }, status: :ok
+    else
+      render json: { errors: @menu.errors }, status: :unprocessable_entity
     end
   end
 

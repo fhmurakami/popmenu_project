@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <title><%= content_for(:title) || "Popmenu Project" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -18,12 +18,13 @@
     <link rel="apple-touch-icon" href="/icon.png">
 
     <%# Includes all stylesheet files in app/assets/stylesheets %>
-    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "bootstrap/dist/css/bootstrap.min.css", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
     <%= javascript_include_tag "application", "data-turbo-track": "reload", type: "module" %>
   </head>
 
   <body>
-    <main class="container mx-auto mt-28 px-5 flex">
+    <main id="react-app">
       <%= yield %>
     </main>
   </body>
