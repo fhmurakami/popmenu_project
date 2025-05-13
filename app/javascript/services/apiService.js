@@ -13,7 +13,7 @@ const handleResponse = async (response) => {
 	return response.json()
 }
 
-// === MENU API CALLS ===
+// === Menu API CALLS ===
 
 // Fetch all menus
 export const fetchMenus = async () => {
@@ -56,6 +56,54 @@ export const updateMenu = async (id, menuData) => {
 // Delete a menu
 export const deleteMenu = async (id) => {
 	const response = await fetch(`${API_BASE_URL}/menus/${id}`, {
+		method: "DELETE",
+		headers: {
+			"X-CSRF-Token": csrfToken,
+		},
+	})
+
+	return handleResponse(response)
+}
+
+// === MenuItem API CALLS ===
+export const fetchMenuItems = async (menuId) => {
+	const response = await fetch(`${API_BASE_URL}/menus/${menuId}/menu_items`)
+	return handleResponse(response)
+}
+
+export const fetchMenuItem = async (menuId, itemId) => {
+	const response = await fetch(`${API_BASE_URL}/menus/${menuId}/menu_items/${itemId}`)
+	return handleResponse(response)
+}
+
+export const createMenuItem = async (menuId, itemData) => {
+	const response = await fetch(`${API_BASE_URL}/menus/${menuId}/menu_items`, {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+			"X-CSRF-Token": csrfToken,
+		},
+		body: JSON.stringify(itemData),
+	})
+
+	return handleResponse(response)
+}
+
+export const updateMenuItem = async (menuId, itemId, itemData) => {
+	const response = await fetch(`${API_BASE_URL}/menus/${menuId}/menu_items/${itemId}`, {
+		method: "PUT",
+		headers: {
+			"Content-Type": "application/json",
+			"X-CSRF-Token": csrfToken,
+		},
+		body: JSON.stringify(itemData),
+	})
+
+	return handleResponse(response)
+}
+
+export const deleteMenuItem = async (menuId, itemId) => {
+	const response = await fetch(`${API_BASE_URL}/menus/${menuId}/menu_items/${itemId}`, {
 		method: "DELETE",
 		headers: {
 			"X-CSRF-Token": csrfToken,
