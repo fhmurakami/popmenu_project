@@ -1,9 +1,9 @@
 import React from "react"
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 import Navbar from "./Navbar"
-import MenuList from "./MenuList"
-// import MenuDetail from "./MenuDetail"
-import MenuForm from "./MenuForm"
+import MenuList from "./Menu/MenuList"
+import MenuDetail from "./Menu/MenuDetail"
+import MenuForm from "./Menu/MenuForm"
 
 const App = () => {
 	return (
@@ -15,6 +15,7 @@ const App = () => {
 						<Route path="/" element={<MenuList />} />
 						<Route path="/menus" element={<MenuList />} />
 						<Route path="/menus/new" element={<MenuForm />} />
+						<Route path="/menus/:id" element={<MenuDetail />} />
 						<Route path="/menus/:id/edit" element={<MenuForm />} />
 					</Routes>
 				</div>
