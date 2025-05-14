@@ -2,7 +2,11 @@ import React, { useState } from "react"
 import { createMenuItem } from "../../services/apiService"
 
 function MenuItemForm({ menuId, onSave }) {
-	const [formData, setFormData] = useState({ name: "", price: "" })
+	const [formData, setFormData] = useState({
+		name: "",
+		price: "",
+		menu_id: menuId,
+	})
 	const [loading, setLoading] = useState(false)
 	const [error, setError] = useState(null)
 
@@ -18,6 +22,11 @@ function MenuItemForm({ menuId, onSave }) {
 	const handleSubmit = async (e) => {
 		e.preventDefault()
 
+		if (!menuId) {
+			setError("Menu Item should be associated with a Menu")
+			return
+		}
+
 		if (!formData.name || !formData.price) {
 			setError("Please fill out all required fields")
 			return
@@ -26,7 +35,7 @@ function MenuItemForm({ menuId, onSave }) {
 		try {
 			setLoading(true)
 			const newItem = await createMenuItem(menuId, formData)
-			setFormData({ name: "", price: "" })
+			setFormData({ name: "", price: "", menu_id: menuId })
 			setLoading(false)
 			setError(null)
 			onSave(newItem)

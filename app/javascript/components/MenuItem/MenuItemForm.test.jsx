@@ -92,7 +92,14 @@ describe("MenuItemForm Component", () => {
 	it("submits the form with valid data", async () => {
 		const user = userEvent.setup()
 
-		const newItem = { id: 111, name: "Test Item", price: 9.99 }
+		const newItem = {
+			id: 111,
+			name: "Test Item",
+			price: 9.99,
+			menu_id: mockMenuId,
+		}
+
+		createMenuItem.mockResolvedValue(newItem)
 
 		render(<MenuItemForm menuId={mockMenuId} onSave={mockOnSave} />)
 
@@ -108,6 +115,7 @@ describe("MenuItemForm Component", () => {
 			expect(createMenuItem).toHaveBeenCalledWith(mockMenuId, {
 				name: "Test Item",
 				price: 9.99,
+				menu_id: mockMenuId,
 			})
 			expect(mockOnSave).toHaveBeenCalledWith(newItem)
 			expect(screen.getByTestId("item-name-input").value).toBe("")
@@ -140,6 +148,22 @@ describe("MenuItemForm Component", () => {
 		// Form values should be preserved
 		expect(screen.getByTestId("item-name-input").value).toBe("Test Item")
 		expect(screen.getByTestId("item-price-input").value).toBe("9.99")
+	})
+
+	// Edge case - no menuId
+	it("displays error when no menuId is provided after submission", async () => {
+		render(<MenuItemForm menuId={null} onSave={mockOnSave} />)
+
+		// Submit form
+		await act(async () => {
+			fireEvent.submit(screen.getByTestId("menu-item-form"))
+		})
+
+		// Error message should be displayed
+		expect(screen.getByTestId("error")).toBeInTheDocument()
+		expect(
+			screen.getByText("Menu Item should be associated with a Menu")
+		).toBeInTheDocument()
 	})
 
 	// Edge case - validation behavior
