@@ -11,8 +11,11 @@ if Rails.env.development?
   require "factory_bot_rails"
   include FactoryBot::Syntax::Methods
 
+  # Create a restaurant
+  restaurant = create(:restaurant, name: "The Restaurant", address: "123 Main St, Anytown, USA", phone_number: "555-1234")
+
   # Create a menu
-  menu = create(:menu, name: "Lunch Menu")
+  menu = create(:menu, name: "Lunch Menu", restaurant: restaurant)
 
   # Create menu items
   [
