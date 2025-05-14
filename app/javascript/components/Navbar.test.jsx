@@ -4,15 +4,16 @@ import "@testing-library/jest-dom"
 import Navbar from "./Navbar"
 
 describe("Navbar Component", () => {
-	test("renders navbar with menu link", () => {
+	test("renders navbar with restaurants and menus links", () => {
 		render(
 			<Router>
 				<Navbar />
 			</Router>
 		)
 
-		const menuLink = screen.getByText("Menus")
-		expect(menuLink).toBeInTheDocument()
-		expect(menuLink.getAttribute("href")).toBe("/menus")
+		const restaurantLink = screen.getByText("Restaurants")
+
+		expect(restaurantLink).toBeInTheDocument()
+		expect(restaurantLink.getAttribute("href")).toBe("/restaurants")
 	})
 })

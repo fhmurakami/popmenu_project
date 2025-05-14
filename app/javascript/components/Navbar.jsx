@@ -8,8 +8,11 @@ const Navbar = () => {
 				<div className="flex items-center justify-between h-16">
 					<div className="flex items-center">
 						<div className="ml-10 flex items-baseline space-x-4">
-							<Link to="/menus" className="px-3 py-2 rounded-md hover:bg-gray-700">
-								Menus
+							<Link
+								to="/restaurants"
+								className="px-3 py-2 rounded-md hover:bg-gray-700"
+							>
+								Restaurants
 							</Link>
 						</div>
 					</div>
