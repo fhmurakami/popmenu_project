@@ -6,7 +6,5 @@ FactoryBot.define do
     category { "Main Course" }
     dietary_restrictions { "None" }
     ingredients { "Beef, Bread, Cheese, Lettuce, Tomato" }
-
-    association :menu
   end
 end

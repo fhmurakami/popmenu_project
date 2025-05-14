@@ -5,7 +5,8 @@ RSpec.describe Menu, type: :model do
     it { is_expected.to validate_presence_of(:name) }
 
     it "is valid with valid attributes" do
-      menu = described_class.new(name: "Breakfast Menu")
+      restaurant = create(:restaurant)
+      menu = described_class.new(name: "Breakfast Menu", restaurant: restaurant)
       expect(menu).to be_valid
     end
 
@@ -16,13 +17,18 @@ RSpec.describe Menu, type: :model do
   end
 
   describe "associations" do
-    it { is_expected.to have_many(:menu_items).dependent(:destroy) }
+    it { is_expected.to belong_to(:restaurant) }
+    it { is_expected.to have_many(:menu_entries).dependent(:destroy) }
+    it { is_expected.to have_many(:menu_items).through(:menu_entries) }
 
-    it "destroys associated menu items when the menu is destroyed" do
-      menu = described_class.create(name: "Lunch Menu")
-      menu.menu_items.create(name: "Salad", price: 5.99)
+    it "destroys associated menu entries when the menu is destroyed" do
+      restaurant = create(:restaurant)
+      menu = described_class.create(name: "Lunch Menu", restaurant: restaurant)
+      menu_item = create(:menu_item, menu_id: menu.id, name: "Salad", price: 5.99)
+      entry = create(:menu_entry, menu: menu, menu_item: menu_item)
 
-      expect { menu.destroy }.to change(MenuItem, :count).by(-1)
+      expect { menu.destroy }.to change(MenuEntry, :count).by(-1)
+      expect(MenuEntry.exists?(entry.id)).to be false
     end
   end
 end
