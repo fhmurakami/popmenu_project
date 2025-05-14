@@ -66,10 +66,10 @@ function MenuItemList({ menuId, menuItems, onUpdateMenuItems }) {
 										className="text-muted"
 										data-testid={`item-price-${item.id}`}
 									>
-										$
-										{typeof item.price === "number"
-											? item.price.toFixed(2)
-											: item.price}
+										{Intl.NumberFormat("en-US", {
+											style: "currency",
+											currency: "USD",
+										}).format(item.price)}
 									</small>
 								</div>
 								<div>
