@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react"
-import { Link } from "react-router-dom"
+import { Link, useParams } from "react-router-dom"
 import { fetchMenus, deleteMenu } from "../../services/apiService"
 
 function MenuList() {
+	const { restaurantId } = useParams()
 	const [menus, setMenus] = useState([])
 	const [loading, setLoading] = useState(true)
 	const [error, setError] = useState(null)
@@ -46,7 +47,11 @@ function MenuList() {
 		<div>
 			<div className="d-flex justify-content-between align-items-center mb-4">
 				<h2>Menus</h2>
-				<Link to="/menus/new" className="btn btn-primary" data-testid="create-menu-btn">
+				<Link
+					to="/menus/new"
+					className="btn btn-primary"
+					data-testid="create-menu-btn"
+				>
 					Add Menu
 				</Link>
 			</div>
@@ -65,22 +70,28 @@ function MenuList() {
 			) : (
 				<div className="row" data-testid="menu-list">
 					{menus.map((menu) => (
-						<div className="col-md-6 col-lg-4 mb-4" key={menu.id} data-testid={`menu-item-menu.id`}>
+						<div
+							className="col-md-6 col-lg-4 mb-4"
+							key={menu.id}
+							data-testid={`menu-item-menu.id`}
+						>
 							<div className="card h-100">
 								<div className="card-body">
 									<h5 className="card-title">{menu.name}</h5>
-									<p className="card-text text-muted">{menu.menu_items?.length || 0} items</p>
+									<p className="card-text text-muted">
+										{menu.menu_items?.length || 0} items
+									</p>
 								</div>
 								<div className="card-footer bg-white border-top-0">
 									<Link
-										to={`/menus/${menu.id}`}
+										to={`/restaurants/${restaurantId}/menus/${menu.id}`}
 										className="btn btn-info me-2"
 										data-testid={`view-menu-${menu.id}`}
 									>
 										View
 									</Link>
 									<Link
-										to={`/menus/${menu.id}/edit`}
+										to={`/restaurants/${restaurantId}/menus/${menu.id}/edit`}
 										className="btn btn-secondary me-2"
 										data-testid={`edit-menu-${menu.id}`}
 									>
