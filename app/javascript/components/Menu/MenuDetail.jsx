@@ -4,7 +4,7 @@ import { fetchMenu, deleteMenu } from "../../services/apiService"
 import MenuItemList from "../MenuItem/MenuItemList"
 
 function MenuDetail() {
-	const { id } = useParams()
+	const { menuId, restaurantId } = useParams()
 	const navigate = useNavigate()
 	const [menu, setMenu] = useState(null)
 	const [loading, setLoading] = useState(true)
@@ -14,23 +14,24 @@ function MenuDetail() {
 		const getMenu = async () => {
 			try {
 				setLoading(true)
-				const data = await fetchMenu(id)
+				const data = await fetchMenu(restaurantId, menuId)
 				setMenu(data)
 				setLoading(false)
 			} catch (error) {
+				console.error("Error fetching menu details:", error)
 				setError("Failed to load menu details")
 				setLoading(false)
 			}
 		}
 
 		getMenu()
-	}, [id])
+	}, [menuId, restaurantId])
 
 	const handleDeleteMenu = async () => {
 		if (window.confirm("Are you sure you want to delete this menu?")) {
 			try {
-				await deleteMenu(id)
-				navigate("/menus")
+				await deleteMenu(restaurantId, menuId)
+				navigate("/restaurants/" + restaurantId + "/menus")
 			} catch (error) {
 				setError("Failed to delete menu")
 			}
@@ -75,14 +76,14 @@ function MenuDetail() {
 				<h2 data-testid="menu-name">{menu.name}</h2>
 				<div>
 					<Link
-						to="/menus"
+						to={`/restaurants/${restaurantId}/menus`}
 						className="btn btn-outline-secondary me-2"
 						data-testid="back-button"
 					>
 						Back to Menus
 					</Link>
 					<Link
-						to={`/menus/${id}/edit`}
+						to={`/restaurants/${restaurantId}/menus/${menuId}/edit`}
 						className="btn btn-secondary me-2"
 						data-testid="edit-button"
 					>
@@ -100,6 +101,7 @@ function MenuDetail() {
 
 			{/* Use the MenuItemList component to display/manage menu items */}
 			<MenuItemList
+				restaurantId={restaurantId}
 				menuId={menu.id}
 				menuItems={menu.menu_items || []}
 				onUpdateMenuItems={updateMenuItems}
