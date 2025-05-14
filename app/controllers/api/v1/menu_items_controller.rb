@@ -39,7 +39,11 @@ class Api::V1::MenuItemsController < ApplicationController
   # DELETE /menu_items/1
   # DELETE /menu_items/1.json
   def destroy
-    @menu_item.destroy!
+    if @menu_item.destroy
+      render json: { message: "Item deleted successfully" }, status: :ok
+    else
+      render json: { errors: @menu.errors }, status: :unprocessable_entity
+    end
   end
 
   private
