@@ -20,6 +20,27 @@ jest.mock("react-router-dom", () => ({
 	useNavigate: jest.fn(),
 }))
 
+// Mock the MenuItemList component
+jest.mock("../MenuItem/MenuItemList", () => {
+	return ({ menuId, menuItems, onUpdateMenuItems }) => (
+		<div data-testid="mock-menu-item-list">
+			<span data-testid="menu-id">{menuId}</span>
+			<span data-testid="menu-items-count">{menuItems.length}</span>
+			<button
+				data-testid="update-menu-items-button"
+				onClick={() =>
+					onUpdateMenuItems([
+						...menuItems,
+						{ id: 999, name: "New Item", price: 5.99 },
+					])
+				}
+			>
+				Add Item
+			</button>
+		</div>
+	)
+})
+
 import MenuDetail from "./MenuDetail"
 import * as api from "../../services/apiService"
 
@@ -123,8 +144,6 @@ describe("MenuDetail Component", () => {
 			expect(screen.queryByTestId("loading")).not.toBeInTheDocument()
 		})
 
-		// O problema é que o data-testeid tem um typo no arquivo original (data-testeid vs data-testid)
-		// Vamos resolver isso procurando pelo texto do botão
 		const deleteButton = screen.getByTestId("delete-button")
 		fireEvent.click(deleteButton)
 
@@ -150,7 +169,7 @@ describe("MenuDetail Component", () => {
 			expect(screen.queryByTestId("loading")).not.toBeInTheDocument()
 		})
 
-		const deleteButton = screen.getByText("Delete Menu")
+		const deleteButton = screen.getByTestId("delete-button")
 		fireEvent.click(deleteButton)
 
 		await waitFor(() => {
@@ -174,12 +193,75 @@ describe("MenuDetail Component", () => {
 			expect(screen.queryByTestId("loading")).not.toBeInTheDocument()
 		})
 
-		const deleteButton = screen.getByText("Delete Menu")
+		const deleteButton = screen.getByTestId("delete-button")
 		fireEvent.click(deleteButton)
 
 		expect(api.deleteMenu).not.toHaveBeenCalled()
 		expect(mockNavigate).not.toHaveBeenCalled()
 
 		window.confirm.mockRestore()
+	})
+
+	// MenuItemList integration tests
+	it("renders the MenuItemList component with correct props", async () => {
+		render(
+			<Router>
+				<MenuDetail />
+			</Router>
+		)
+
+		await waitFor(() => {
+			expect(screen.queryByTestId("loading")).not.toBeInTheDocument()
+		})
+
+		// Check if MenuItemList is rendered
+		expect(screen.getByTestId("mock-menu-item-list")).toBeInTheDocument()
+
+		// Check if correct props are passed
+		expect(screen.getByTestId("menu-id").textContent).toBe("1")
+		expect(screen.getByTestId("menu-items-count").textContent).toBe("1")
+	})
+
+	it("renders MenuItemList with empty array when menu has no menu_items", async () => {
+		api.fetchMenu.mockResolvedValue({
+			id: 1,
+			name: "Lunch Menu",
+			menu_items: null,
+		})
+
+		render(
+			<Router>
+				<MenuDetail />
+			</Router>
+		)
+
+		await waitFor(() => {
+			expect(screen.queryByTestId("loading")).not.toBeInTheDocument()
+		})
+
+		// Check if MenuItemList is rendered with empty array
+		expect(screen.getByTestId("menu-items-count").textContent).toBe("0")
+	})
+
+	it("updates menu items when updateMenuItems function is called", async () => {
+		render(
+			<Router>
+				<MenuDetail />
+			</Router>
+		)
+
+		await waitFor(() => {
+			expect(screen.queryByTestId("loading")).not.toBeInTheDocument()
+		})
+
+		// Simulate adding a new menu item through the mock component
+		fireEvent.click(screen.getByTestId("update-menu-items-button"))
+
+		// Check if menu state is updated with the new item
+		await waitFor(() => {
+			// After the update, the MenuItemList should be re-rendered with updated props
+			// Our mock shows the count of menu items, which should now be 2
+			expect(screen.getByTestId("menu-items-count").textContent).toBe("2")
+		})
 	})
 })
