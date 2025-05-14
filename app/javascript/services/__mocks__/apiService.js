@@ -15,6 +15,8 @@ const handleResponse = async (response) => {
 }
 
 // Mock implementations of all exported functions
+
+// === Menu API CALLS ===
 const fetchMenus = jest.fn().mockImplementation(async () => {
 	const response = await fetch(`${API_BASE_URL}/menus`)
 	return handleResponse(response)
@@ -59,5 +61,66 @@ const deleteMenu = jest.fn().mockImplementation(async (id) => {
 	return handleResponse(response)
 })
 
+// === MenuItem API CALLS ===
+const fetchMenuItems = jest.fn().mockImplementation(async (menuId) => {
+	const response = await fetch(`${API_BASE_URL}/menus/${menuId}/menu_items`)
+	return handleResponse(response)
+})
+
+const fetchMenuItem = jest.fn().mockImplementation(async (menuId, itemId) => {
+	const response = await fetch(`${API_BASE_URL}/menus/${menuId}/menu_items/${itemId}`)
+	return handleResponse(response)
+})
+
+const createMenuItem = jest.fn().mockImplementation(async (menuId, itemData) => {
+	const response = await fetch(`${API_BASE_URL}/menus/${menuId}/menu_items`, {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+			"X-CSRF-Token": MOCK_CSRF_TOKEN,
+		},
+		body: JSON.stringify(itemData),
+	})
+
+	return handleResponse(response)
+})
+
+const updateMenuItem = jest.fn().mockImplementation(async (menuId, itemId, itemData) => {
+	const response = await fetch(`${API_BASE_URL}/menus/${menuId}/menu_items/${itemId}`, {
+		method: "PUT",
+		headers: {
+			"Content-Type": "application/json",
+			"X-CSRF-Token": MOCK_CSRF_TOKEN,
+		},
+		body: JSON.stringify(itemData),
+	})
+
+	return handleResponse(response)
+})
+
+const deleteMenuItem = jest.fn().mockImplementation(async (menuId, itemId) => {
+	const response = await fetch(`${API_BASE_URL}/menus/${menuId}/menu_items/${itemId}`, {
+		method: "DELETE",
+		headers: {
+			"X-CSRF-Token": MOCK_CSRF_TOKEN,
+		},
+	})
+
+	return handleResponse(response)
+})
+
 // Export all functions and constants
-export { fetchMenus, fetchMenu, createMenu, updateMenu, deleteMenu, API_BASE_URL, MOCK_CSRF_TOKEN }
+export {
+	fetchMenus,
+	fetchMenu,
+	createMenu,
+	updateMenu,
+	deleteMenu,
+	fetchMenuItems,
+	fetchMenuItem,
+	createMenuItem,
+	updateMenuItem,
+	deleteMenuItem,
+	API_BASE_URL,
+	MOCK_CSRF_TOKEN,
+}

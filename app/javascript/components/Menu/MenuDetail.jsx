@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react"
 import { Link, useParams, useNavigate } from "react-router-dom"
 import { fetchMenu, deleteMenu } from "../../services/apiService"
+import MenuItemList from "../MenuItem/MenuItemList"
 
 function MenuDetail() {
 	const { id } = useParams()
@@ -36,6 +37,14 @@ function MenuDetail() {
 		}
 	}
 
+	// Function to update menu items in state after a successful add/delete
+	const updateMenuItems = (updatedMenuItems) => {
+		setMenu({
+			...menu,
+			menu_items: updatedMenuItems,
+		})
+	}
+
 	if (loading) {
 		return (
 			<div className="text-center mt-5" data-testid="loading">
@@ -65,7 +74,11 @@ function MenuDetail() {
 			<div className="d-flex justify-content-between align-items-center mb-4">
 				<h2 data-testid="menu-name">{menu.name}</h2>
 				<div>
-					<Link to="/menus" className="btn btn-outline-secondary me-2" data-testid="back-button">
+					<Link
+						to="/menus"
+						className="btn btn-outline-secondary me-2"
+						data-testid="back-button"
+					>
 						Back to Menus
 					</Link>
 					<Link
@@ -75,11 +88,22 @@ function MenuDetail() {
 					>
 						Edit Menu
 					</Link>
-					<button onClick={handleDeleteMenu} className="btn btn-danger" data-testid="delete-button">
+					<button
+						onClick={handleDeleteMenu}
+						className="btn btn-danger"
+						data-testid="delete-button"
+					>
 						Delete Menu
 					</button>
 				</div>
 			</div>
+
+			{/* Use the MenuItemList component to display/manage menu items */}
+			<MenuItemList
+				menuId={menu.id}
+				menuItems={menu.menu_items || []}
+				onUpdateMenuItems={updateMenuItems}
+			/>
 		</div>
 	)
 }

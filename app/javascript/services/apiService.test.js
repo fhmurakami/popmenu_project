@@ -24,6 +24,7 @@ describe("apiService", () => {
 		jest.restoreAllMocks()
 	})
 
+	// === MENU TESTS ===
 	describe("fetchMenus", () => {
 		it("should fetch all menus successfully", async () => {
 			// Arrange
@@ -341,6 +342,238 @@ describe("apiService", () => {
 			await expect(apiService.deleteMenu(menuId)).rejects.toEqual(errorMessage)
 		})
 	})
+
+	// === MENU ITEM TESTS ===
+	describe("fetchMenuItems", () => {
+		it("should fetch all menu items for a menu", async () => {
+			// Arrange
+			const menuId = 1
+			const menuItemsData = [{ id: 1, name: "Burger" }]
+
+			global.fetch.mockResolvedValueOnce({
+				ok: true,
+				json: () => Promise.resolve(menuItemsData),
+			})
+
+			// Act
+			const result = await apiService.fetchMenuItems(menuId)
+
+			// Assert
+			expect(global.fetch).toHaveBeenCalledWith(`${API_BASE_URL}/menus/${menuId}/menu_items`)
+			expect(result).toEqual(menuItemsData)
+		})
+
+		it("should handle server error when fetching menu items", async () => {
+			// Arrange
+			const menuId = 1
+			const errorMessage = "Internal server error"
+
+			global.fetch.mockResolvedValueOnce({
+				ok: false,
+				status: 500,
+				json: () => Promise.resolve({ error: errorMessage }),
+			})
+
+			// Act & Assert
+			await expect(apiService.fetchMenuItems(menuId)).rejects.toEqual(errorMessage)
+		})
+	})
+
+	describe("fetchMenuItem", () => {
+		it("should fetch a single menu item by ID", async () => {
+			// Arrange
+			const menuId = 1
+			const itemId = 1
+			const menuItemData = { id: itemId, name: "Burger" }
+
+			global.fetch.mockResolvedValueOnce({
+				ok: true,
+				json: () => Promise.resolve(menuItemData),
+			})
+
+			// Act
+			const result = await apiService.fetchMenuItem(menuId, itemId)
+
+			// Assert
+			expect(global.fetch).toHaveBeenCalledWith(
+				`${API_BASE_URL}/menus/${menuId}/menu_items/${itemId}`
+			)
+			expect(result).toEqual(menuItemData)
+		})
+
+		it("should handle item not found", async () => {
+			// Arrange
+			const menuId = 1
+			const itemId = 999
+			const errorMessage = "Item not found"
+
+			global.fetch.mockResolvedValueOnce({
+				ok: false,
+				status: 404,
+				json: () => Promise.resolve({ error: errorMessage }),
+			})
+
+			// Act & Assert
+			await expect(apiService.fetchMenuItem(menuId, itemId)).rejects.toEqual(errorMessage)
+		})
+	})
+
+	describe("createMenuItem", () => {
+		it("should create a new menu item", async () => {
+			// Arrange
+			const menuId = 1
+			const newItem = { name: "Salad" }
+			const responseData = { id: 2, ...newItem }
+
+			global.fetch.mockResolvedValueOnce({
+				ok: true,
+				json: () => Promise.resolve(responseData),
+			})
+
+			// Act
+			const result = await apiService.createMenuItem(menuId, newItem)
+
+			// Assert
+			expect(global.fetch).toHaveBeenCalledWith(`${API_BASE_URL}/menus/${menuId}/menu_items`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					"X-CSRF-Token": MOCK_CSRF_TOKEN,
+				},
+				body: JSON.stringify(newItem),
+			})
+			expect(result).toEqual(responseData)
+		})
+
+		it("should handle validation error when creating a menu item", async () => {
+			// Arrange
+			const menuId = 1
+			const invalidItem = {}
+			const errorMessage = "Name can't be blank"
+
+			global.fetch.mockResolvedValueOnce({
+				ok: false,
+				status: 422,
+				json: () => Promise.resolve({ error: errorMessage }),
+			})
+
+			// Act & Assert
+			await expect(apiService.createMenuItem(menuId, invalidItem)).rejects.toEqual(errorMessage)
+		})
+	})
+
+	describe("updateMenuItem", () => {
+		it("should update an existing menu item", async () => {
+			// Arrange
+			const menuId = 1
+			const itemId = 1
+			const itemUpdates = { name: "Updated Salad" }
+			const responseData = { id: itemId, ...itemUpdates }
+
+			global.fetch.mockResolvedValueOnce({
+				ok: true,
+				json: () => Promise.resolve(responseData),
+			})
+
+			// Act
+			const result = await apiService.updateMenuItem(menuId, itemId, itemUpdates)
+
+			// Assert
+			expect(global.fetch).toHaveBeenCalledWith(
+				`${API_BASE_URL}/menus/${menuId}/menu_items/${itemId}`,
+				{
+					method: "PUT",
+					headers: {
+						"Content-Type": "application/json",
+						"X-CSRF-Token": MOCK_CSRF_TOKEN,
+					},
+					body: JSON.stringify(itemUpdates),
+				}
+			)
+			expect(result).toEqual(responseData)
+		})
+
+		it("should handle validation errors when updating a menu item", async () => {
+			// Arrange
+			const menuId = 1
+			const itemId = 1
+			const invalidUpdates = { name: "" }
+			const errorMessage = "Name can't be blank"
+
+			global.fetch.mockResolvedValueOnce({
+				ok: false,
+				status: 422,
+				json: () => Promise.resolve({ error: errorMessage }),
+			})
+
+			// Act & Assert
+			await expect(apiService.updateMenuItem(menuId, itemId, invalidUpdates)).rejects.toEqual(
+				errorMessage
+			)
+		})
+	})
+
+	describe("deleteMenuItem", () => {
+		it("should delete a menu item", async () => {
+			// Arrange
+			const menuId = 1
+			const itemId = 1
+			const responseData = { success: true }
+
+			global.fetch.mockResolvedValueOnce({
+				ok: true,
+				json: () => Promise.resolve(responseData),
+			})
+
+			// Act
+			const result = await apiService.deleteMenuItem(menuId, itemId)
+
+			// Assert
+			expect(global.fetch).toHaveBeenCalledWith(
+				`${API_BASE_URL}/menus/${menuId}/menu_items/${itemId}`,
+				{
+					method: "DELETE",
+					headers: {
+						"X-CSRF-Token": MOCK_CSRF_TOKEN,
+					},
+				}
+			)
+			expect(result).toEqual(responseData)
+		})
+
+		it("should handle when item to delete doesn't exist", async () => {
+			// Arrange
+			const menuId = 1
+			const itemId = 999
+			const errorMessage = "Item not found"
+
+			global.fetch.mockResolvedValueOnce({
+				ok: false,
+				status: 404,
+				json: () => Promise.resolve({ error: errorMessage }),
+			})
+
+			// Act & Assert
+			await expect(apiService.deleteMenuItem(menuId, itemId)).rejects.toEqual(errorMessage)
+		})
+
+		it("should handle server error during item deletion", async () => {
+			// Arrange
+			const menuId = 1
+			const itemId = 1
+			const errorMessage = "Internal server error during deletion"
+
+			global.fetch.mockResolvedValueOnce({
+				ok: false,
+				status: 500,
+				json: () => Promise.resolve({ error: errorMessage }),
+			})
+
+			// Act & Assert
+			await expect(apiService.deleteMenuItem(menuId, itemId)).rejects.toEqual(errorMessage)
+		})
+	})
+
 	// === GENERAL ERROR HANDLING TESTS ===
 	describe("general error handling", () => {
 		it("should handle non-JSON errors", async () => {
