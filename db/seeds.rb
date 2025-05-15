@@ -12,7 +12,12 @@ if Rails.env.development?
   include FactoryBot::Syntax::Methods
 
   # Create a restaurant
-  restaurant = create(:restaurant, name: "The Restaurant", address: "123 Main St, Anytown, USA", phone_number: "555-1234")
+  restaurant = create(
+    :restaurant,
+    name: "The Restaurant",
+    address: "123 Main St, Anytown, USA",
+    phone: "555-1234"
+  )
 
   # Create a menu
   menu = create(:menu, name: "Lunch Menu", restaurant: restaurant)
@@ -38,6 +43,7 @@ if Rails.env.development?
       menu_id: menu.id
     }
   ].map do |attributes|
-    create(:menu_item, attributes)
+    menu_item = create(:menu_item, attributes)
+    create(:menu_entry, menu:, menu_item:)
   end
 end
