@@ -4,12 +4,12 @@ class Api::V1::MenusController < ApplicationController
   # GET /menus or /menus.json
   def index
     @menus = Menu.all
-    render json: @menus.to_json(include: :menu_items)
+    render json: @menus, include: :menu_items
   end
 
   # GET /menus/1 or /menus/1.json
   def show
-    render json: @menu.to_json(include: :menu_items)
+    render json: @menu, include: :menu_items
   end
 
   def new
@@ -22,7 +22,7 @@ class Api::V1::MenusController < ApplicationController
     @menu = Menu.new(menu_params)
 
     if @menu.save
-      render json: @menu.to_json(include: :menu_items), status: :created
+      render json: @menu, include: :menu_items, status: :created
     else
       render json: { errors: @menu.errors }, status: :unprocessable_entity
     end
@@ -31,7 +31,7 @@ class Api::V1::MenusController < ApplicationController
   # PATCH/PUT /menus/1 or /menus/1.json
   def update
     if @menu.update(menu_params)
-      render json: @menu.to_json(include: :menu_items), status: :ok
+      render json: @menu, include: :menu_items, status: :ok
     else
       render json: { errors: @menu.errors }, status: :unprocessable_entity
     end
@@ -54,6 +54,7 @@ class Api::V1::MenusController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def menu_params
-      params.expect(menu: [ :name ])
+      restaurant_id, menu_data = params.expect(:restaurant_id, menu: [ :name ])
+      menu_data.merge(restaurant_id: restaurant_id)
     end
 end
