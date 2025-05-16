@@ -24,11 +24,12 @@ RSpec.describe Menu, type: :model do
     it "destroys associated menu entries when the menu is destroyed" do
       restaurant = create(:restaurant)
       menu = described_class.create(name: "Lunch Menu", restaurant: restaurant)
-      menu_item = create(:menu_item, menu_id: menu.id, name: "Salad", price: 5.99)
-      entry = create(:menu_entry, menu: menu, menu_item: menu_item)
+      menu_item = create(:menu_item, name: "Salad")
+      entry = create(:menu_entry, menu: menu, menu_item: menu_item, price: 5.99)
 
       expect { menu.destroy }.to change(MenuEntry, :count).by(-1)
       expect(MenuEntry.exists?(entry.id)).to be false
+      expect(MenuItem.exists?(menu_item.id)).to be true
     end
   end
 end
