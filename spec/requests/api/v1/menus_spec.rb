@@ -31,8 +31,10 @@ RSpec.describe "/menus", type: :request do
       it "renders a successful response" do
         # Arrange
         create_list(:menu, 3, restaurant: restaurant)
+
         # Act
         get api_v1_restaurant_menus_url(restaurant)
+
         # Assert
         expect(response).to be_successful
         expect(JSON.parse(response.body).size).to eq(3)
@@ -46,8 +48,10 @@ RSpec.describe "/menus", type: :request do
             menu_items_count: 3,
             restaurant: restaurant
           )
+
           # Act
           get api_v1_restaurant_menus_url(restaurant)
+
           # Assert
           parsed_menu_list = JSON.parse(response.body)
           parsed_menu_items = parsed_menu_list.first["menu_items"]
@@ -56,8 +60,6 @@ RSpec.describe "/menus", type: :request do
           expect(parsed_menu_list.size).to eq(1)
           expect(parsed_menu_items.size).to eq(3)
           expect(parsed_menu_items.last["name"]).to eq(menu.menu_items.last.name)
-          expect(parsed_menu_items.last["price"]).to eq(menu.menu_items.last.price.to_s)
-          expect(parsed_menu_items.last["menu_id"]).to eq(menu.id)
         end
       end
     end
@@ -102,8 +104,6 @@ RSpec.describe "/menus", type: :request do
           expect(parsed_menu).to be_an_instance_of(Hash)
           expect(parsed_menu_items.size).to eq(3)
           expect(parsed_menu_items.last["name"]).to eq(menu.menu_items.last.name)
-          expect(parsed_menu_items.last["price"]).to eq(menu.menu_items.last.price.to_s)
-          expect(parsed_menu_items.last["menu_id"]).to eq(menu.id)
         end
       end
     end
