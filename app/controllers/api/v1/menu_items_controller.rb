@@ -17,10 +17,21 @@ class Api::V1::MenuItemsController < ApplicationController
   # POST /menu_items
   # POST /menu_items.json
   def create
-    @menu_item = MenuItem.new(menu_item_params)
+    # @menu_item = MenuItem.new(menu_item_params)
+    @menu_item = MenuItem.find_or_create_by(name: menu_item_params[:name])
 
-    if @menu_item.save
-      render json: @menu_item, status: :created
+    if @menu_item.persisted?
+      entry_params = menu_item_params.except(:name)
+
+      @menu_entry = MenuEntry.new(
+        entry_params.merge(menu_item_id: @menu_item.id)
+      )
+
+      if @menu_entry.save
+        render json: { menu_item: @menu_item, menu_entry: @menu_entry }, status: :created
+      else
+        render json: { errors: @menu_entry.errors }, status: :unprocessable_entity
+      end
     else
       render json: { errors: @menu_item.errors }, status: :unprocessable_entity
     end
@@ -29,8 +40,21 @@ class Api::V1::MenuItemsController < ApplicationController
   # PATCH/PUT /menu_items/1
   # PATCH/PUT /menu_items/1.json
   def update
-    if @menu_item.update(menu_item_params)
-      render json: @menu_item, status: :ok
+    if @menu_item.update(name: menu_item_params[:name])
+      @menu_entry = MenuEntry.find_or_create_by(
+        menu_item_id: @menu_item.id,
+        menu_id: menu_item_params[:menu_id]
+      )
+
+      if @menu_entry
+        if @menu_entry.update(menu_item_params.except(:name))
+          render json: { menu_item: @menu_item, menu_entry: @menu_entry }, status: :ok
+        else
+          render json: { errors: @menu_entry.errors }, status: :unprocessable_entity
+        end
+      else
+        render json: { errors: "Menu entry not found" }, status: :not_found
+      end
     else
       render json: { errors: @menu_item.errors }, status: :unprocessable_entity
     end
