@@ -62,7 +62,7 @@ RSpec.describe "/menu_items", type: :request do
   describe "GET /show" do
     context "when the menu item does not exist" do
       it "returns a not found response (404)" do
-        get api_v1_restaurant_menu_item_url(restaurant, menu, id: -1), as: :json
+        get api_v1_restaurant_menu_item_url(restaurant, menu, id: 999), as: :json
         expect(response).to have_http_status(:not_found)
       end
     end
@@ -193,6 +193,13 @@ RSpec.describe "/menu_items", type: :request do
   end
 
   describe "PATCH /update" do
+    context "when menu item does not exist" do
+      it "returns a 404" do
+        patch api_v1_restaurant_menu_item_url(restaurant, menu, 0)
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+
     context "with valid parameters" do
       let(:new_menu) { create(:menu, restaurant:) }
       let(:new_attributes) {
@@ -317,6 +324,13 @@ RSpec.describe "/menu_items", type: :request do
   end
 
   describe "DELETE /destroy" do
+    context "when the menu item does not exist" do
+      it "returns a 404" do
+        delete api_v1_restaurant_menu_item_url(restaurant, menu, 0)
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+
     it "destroys the requested menu_item" do
       menu_item = create(:menu_item)
       expect {
