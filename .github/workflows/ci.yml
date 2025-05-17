@@ -64,6 +64,9 @@ jobs:
       - name: Install JavaScript dependencies
         run: yarn install
 
+      - name: Build assets
+        run: yarn build && bundle exec rails tailwindcss:build
+
       - name: Prepare test database
         run: |
           cp config/database.yml.github-actions config/database.yml
