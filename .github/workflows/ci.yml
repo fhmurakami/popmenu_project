@@ -72,6 +72,18 @@ jobs:
       - name: Run RSpec test suite
         run: bundle exec rspec
 
+      - name: Upload SimpleCov coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 7
+
+      - name: Print test coverage summary
+        run: |
+          cat coverage/.last_run.json | jq '.result.line_coverage'
+          cat coverage/index.html | grep -A 5 "Coverage report generated"
+
   lint:
     runs-on: ubuntu-latest
     steps:
