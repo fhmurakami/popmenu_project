@@ -5,13 +5,18 @@ class Api::V1::MenuItemsController < ApplicationController
   # GET /menu_items.json
   def index
     @menu_items = MenuItem.all
-    render json: @menu_items
+    menu_entries = MenuEntry.where(
+      menu_item_id: @menu_items.map(&:id),
+      menu_id: params[:menu_id]
+    ).index_by(&:menu_item_id)
+
+    render json: MenuItemBlueprint.render(@menu_items, menu_entries:)
   end
 
   # GET /menu_items/1
   # GET /menu_items/1.json
   def show
-    render json: @menu_item
+    render json: MenuItemBlueprint.render(@menu_item)
   end
 
   # POST /menu_items
@@ -28,7 +33,7 @@ class Api::V1::MenuItemsController < ApplicationController
       )
 
       if @menu_entry.save
-        render json: { menu_item: @menu_item, menu_entry: @menu_entry }, status: :created
+        render json: MenuItemBlueprint.render(@menu_item, menu_entry: @menu_entry), status: :created
       else
         render json: { errors: @menu_entry.errors }, status: :unprocessable_entity
       end
@@ -48,7 +53,7 @@ class Api::V1::MenuItemsController < ApplicationController
 
       if @menu_entry
         if @menu_entry.update(menu_item_params.except(:name))
-          render json: { menu_item: @menu_item, menu_entry: @menu_entry }, status: :ok
+          render json: MenuItemBlueprint.render(@menu_item, menu_entry: @menu_entry), status: :ok
         else
           render json: { errors: @menu_entry.errors }, status: :unprocessable_entity
         end
