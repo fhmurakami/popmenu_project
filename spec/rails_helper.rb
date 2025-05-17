@@ -43,6 +43,9 @@ end
 RSpec.configure do |config|
   # FactoryBot config for Rails
   config.include FactoryBot::Syntax::Methods
+  config.before do
+    FactoryBot.reload # reset sequences before each test
+  end
 
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
   config.fixture_paths = [

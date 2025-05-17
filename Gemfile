@@ -21,6 +21,8 @@ gem "jbuilder"
 # Tailwind CSS, a utility-first CSS framework [https://tailwindcss.com/]
 gem "tailwindcss-ruby", "~> 4.1"
 gem "tailwindcss-rails", "~> 4.2"
+# Use Blueprinter as a JSON serializer
+gem "blueprinter"
 
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
 # gem "bcrypt", "~> 3.1.7"

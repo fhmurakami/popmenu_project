@@ -9,8 +9,8 @@ RSpec.describe "/menu_items", type: :request do
   let(:valid_attributes) {
     {
       menu_id: menu.id,
-      name: "Cheese Burguer",
-      description: "Delicious cheese burguer",
+      name: "Cheese Burger",
+      description: "Delicious cheese burger",
       price: 9.99,
       category: "Main Course",
       dietary_restrictions: "None",
@@ -44,11 +44,17 @@ RSpec.describe "/menu_items", type: :request do
     context "when menu items exist" do
       it "renders a successful response" do
         menu = create(:menu_with_items, menu_items_count: 3, restaurant:)
+        menu_entries = menu.menu_entries
 
         get api_v1_restaurant_menu_items_url(restaurant, menu), headers: valid_headers, as: :json
 
+        parsed_response = JSON.parse(response.body)
+
         expect(response).to be_successful
-        expect(JSON.parse(response.body).size).to eq(3)
+        expect(parsed_response.size).to eq(3)
+        expect(parsed_response.first["name"]).to eq("Menu Item 1")
+        expect(parsed_response.last["name"]).to eq("Menu Item 3")
+        expect(parsed_response.first["price"]).to eq(menu_entries.first.price.to_s)
       end
     end
   end
@@ -116,8 +122,12 @@ RSpec.describe "/menu_items", type: :request do
                params: { menu_item: valid_attributes }, headers: valid_headers, as: :json
           expect(response).to have_http_status(:created)
           expect(response.content_type).to match(a_string_including("application/json"))
-          expect(response.body).to include("menu_item")
-          expect(response.body).to include("menu_entry")
+          expect(response.body).to include('"name":"Cheese Burger"')
+          expect(response.body).to include('"price":"9.99"')
+          expect(response.body).to include('"description":"Delicious cheese burger"')
+          expect(response.body).to include('"category":"Main Course"')
+          expect(response.body).to include('"dietary_restrictions":"None"')
+          expect(response.body).to include('"ingredients":"Beef, Bread, Cheese, Lettuce, Tomato"')
         end
       end
 
@@ -288,7 +298,7 @@ RSpec.describe "/menu_items", type: :request do
 
         expect(another_menu_entry.price).to eq(9.99)
         expect(another_menu_entry.menu_id).to eq(new_menu.id)
-        expect(another_menu_entry.description).to eq("Delicious cheese burguer")
+        expect(another_menu_entry.description).to eq("Delicious cheese burger")
         expect(another_menu_entry.category).to eq("Main Course")
         expect(another_menu_entry.dietary_restrictions).to eq("None")
         expect(another_menu_entry.ingredients).to eq("Beef, Bread, Cheese, Lettuce, Tomato")
