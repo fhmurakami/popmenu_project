@@ -44,6 +44,7 @@ jobs:
       PGUSER: postgres
       PGPASSWORD: postgres
       DATABASE_URL: postgres://postgres:postgres@localhost:5432/test
+      RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY}}
 
     steps:
       - name: Checkout code
