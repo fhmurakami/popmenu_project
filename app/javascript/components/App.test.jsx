@@ -3,23 +3,23 @@ import "@testing-library/jest-dom"
 import App from "./App"
 
 // Mock child components to isolate App's rendering and routing
-jest.mock("./Navbar", () => {
+jest.mock("./shared/Navbar", () => {
 	return () => <div data-testid="mock-navbar">Navbar</div>
 })
-jest.mock("./Menu/MenuList", () => {
+jest.mock("./menu/MenuList", () => {
 	return () => <div data-testid="mock-menu-list">MenuList</div>
 })
-jest.mock("./Menu/MenuDetail", () => {
-	return () => <div data-testid="mock-menu-detail">MenuDetail</div>
+jest.mock("./menu/MenuInfo", () => {
+	return () => <div data-testid="mock-menu-detail">MenuInfo</div>
 })
-jest.mock("./Menu/MenuForm", () => {
+jest.mock("./menu/MenuForm", () => {
 	return () => <div data-testid="mock-menu-form">MenuForm</div>
 })
-jest.mock("./restaurant/RestaurantIndex", () => {
-	return () => <div data-testid="mock-restaurant-index">RestaurantIndex</div>
+jest.mock("./restaurant/RestaurantList", () => {
+	return () => <div data-testid="mock-restaurant-index">RestaurantList</div>
 })
-jest.mock("./restaurant/RestaurantShow", () => {
-	return () => <div data-testid="mock-restaurant-show">RestaurantShow</div>
+jest.mock("./restaurant/RestaurantInfo", () => {
+	return () => <div data-testid="mock-restaurant-show">RestaurantInfo</div>
 })
 jest.mock("./restaurant/RestaurantForm", () => {
 	return () => <div data-testid="mock-restaurant-form">RestaurantForm</div>
@@ -38,7 +38,7 @@ describe("App Component", () => {
 		expect(screen.queryByTestId("mock-restaurant-form")).not.toBeInTheDocument()
 	})
 
-	test("renders RestaurantIndex on the /restaurants route", () => {
+	test("renders RestaurantList on the /restaurants route", () => {
 		window.history.pushState({}, "Test page", "/restaurants")
 		render(<App />)
 		expect(screen.getByTestId("mock-navbar")).toBeInTheDocument()
@@ -46,7 +46,7 @@ describe("App Component", () => {
 		expect(screen.queryByTestId("mock-restaurant-form")).not.toBeInTheDocument()
 	})
 
-	test("renders RestaurantShow on the /restaurants/:restaurantId route", () => {
+	test("renders RestaurantInfo on the /restaurants/:restaurantId route", () => {
 		window.history.pushState({}, "Test page", "/restaurants/1")
 		render(<App />)
 		expect(screen.getByTestId("mock-navbar")).toBeInTheDocument()

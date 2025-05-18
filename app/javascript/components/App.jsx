@@ -1,12 +1,12 @@
 import React from "react"
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
-import Navbar from "./Navbar"
-import MenuList from "./Menu/MenuList"
-import MenuDetail from "./Menu/MenuDetail"
-import MenuForm from "./Menu/MenuForm"
-import RestaurantIndex from "./restaurant/RestaurantIndex"
+import Navbar from "./shared/Navbar"
+import MenuList from "./menu/MenuList"
+import MenuInfo from "./menu/MenuInfo"
+import MenuForm from "./menu/MenuForm"
+import RestaurantList from "./restaurant/RestaurantList"
 import RestaurantForm from "./restaurant/RestaurantForm"
-import RestaurantShow from "./restaurant/RestaurantShow"
+import RestaurantInfo from "./restaurant/RestaurantInfo"
 
 const App = () => {
 	return (
@@ -16,12 +16,12 @@ const App = () => {
 				<div className="container mx-auto px-4 py-8">
 					<Routes>
 						{/* Restaurant routes */}
-						<Route path="/" element={<RestaurantIndex />} />
-						<Route path="/restaurants" element={<RestaurantIndex />} />
+						<Route path="/" element={<RestaurantList />} />
+						<Route path="/restaurants" element={<RestaurantList />} />
 						<Route path="/restaurants/new" element={<RestaurantForm />} />
 						<Route
 							path="/restaurants/:restaurantId"
-							element={<RestaurantShow />}
+							element={<RestaurantInfo />}
 						/>
 						<Route
 							path="/restaurants/:restaurantId/edit"
@@ -39,7 +39,7 @@ const App = () => {
 						/>
 						<Route
 							path="/restaurants/:restaurantId/menus/:menuId"
-							element={<MenuDetail />}
+							element={<MenuInfo />}
 						/>
 						<Route
 							path="/restaurants/:restaurantId/menus/:menuId/edit"
