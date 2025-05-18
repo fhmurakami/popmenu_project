@@ -17,8 +17,3 @@ export const renderWithRoute = (ui, route, path) => {
 		</MemoryRouter>
 	)
 }
-
-// api.fetchMenu.mockResolvedValue(mockMenu)
-// api.createMenu.mockResolvedValue({})
-// api.updateMenu.mockResolvedValue({})
-// require("react-router-dom").useNavigate.mockReturnValue(mockNavigate)

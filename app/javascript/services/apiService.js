@@ -87,7 +87,6 @@ export const fetchMenu = async (restaurantId, menuId) => {
 
 // Create a new menu
 export const createMenu = async (restaurantId, menuData) => {
-	console.log("Creating menu with data:", menuData)
 	const response = await fetch(
 		`${API_BASE_URL}/restaurants/${restaurantId}/menus`,
 		{
@@ -104,7 +103,6 @@ export const createMenu = async (restaurantId, menuData) => {
 
 // Update an existing menu
 export const updateMenu = async (restaurantId, menuId, menuData) => {
-	console.log("Updating menu with data:", menuData)
 	const response = await fetch(
 		`${API_BASE_URL}/restaurants/${restaurantId}/menus/${menuId}`,
 		{
