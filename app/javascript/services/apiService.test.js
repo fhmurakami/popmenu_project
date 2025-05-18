@@ -106,7 +106,9 @@ describe("apiService", () => {
 			const result = await apiService.fetchMenu(menuId)
 
 			// Assert
-			expect(global.fetch).toHaveBeenCalledWith(`${API_BASE_URL}/menus/${menuId}`)
+			expect(global.fetch).toHaveBeenCalledWith(
+				`${API_BASE_URL}/menus/${menuId}`
+			)
 			expect(result).toEqual(menuData)
 		})
 
@@ -194,7 +196,9 @@ describe("apiService", () => {
 			})
 
 			// Act & Assert
-			await expect(apiService.createMenu(invalidMenu)).rejects.toEqual(errorMessage)
+			await expect(apiService.createMenu(invalidMenu)).rejects.toEqual(
+				errorMessage
+			)
 		})
 
 		it("should handle server errors when creating a menu", async () => {
@@ -244,14 +248,17 @@ describe("apiService", () => {
 			const result = await apiService.updateMenu(menuId, menuUpdates)
 
 			// Assert
-			expect(global.fetch).toHaveBeenCalledWith(`${API_BASE_URL}/menus/${menuId}`, {
-				method: "PUT",
-				headers: {
-					"Content-Type": "application/json",
-					"X-CSRF-Token": MOCK_CSRF_TOKEN,
-				},
-				body: JSON.stringify({ menu: menuUpdates }),
-			})
+			expect(global.fetch).toHaveBeenCalledWith(
+				`${API_BASE_URL}/menus/${menuId}`,
+				{
+					method: "PUT",
+					headers: {
+						"Content-Type": "application/json",
+						"X-CSRF-Token": MOCK_CSRF_TOKEN,
+					},
+					body: JSON.stringify({ menu: menuUpdates }),
+				}
+			)
 			expect(result).toEqual(responseData)
 		})
 
@@ -268,7 +275,9 @@ describe("apiService", () => {
 			})
 
 			// Act & Assert
-			await expect(apiService.updateMenu(menuId, menuUpdates)).rejects.toEqual(errorMessage)
+			await expect(apiService.updateMenu(menuId, menuUpdates)).rejects.toEqual(
+				errorMessage
+			)
 		})
 
 		it("should handle validation errors when updating a menu", async () => {
@@ -284,7 +293,9 @@ describe("apiService", () => {
 			})
 
 			// Act & Assert
-			await expect(apiService.updateMenu(menuId, invalidUpdates)).rejects.toEqual(errorMessage)
+			await expect(
+				apiService.updateMenu(menuId, invalidUpdates)
+			).rejects.toEqual(errorMessage)
 		})
 	})
 
@@ -303,12 +314,15 @@ describe("apiService", () => {
 			const result = await apiService.deleteMenu(menuId)
 
 			// Assert
-			expect(global.fetch).toHaveBeenCalledWith(`${API_BASE_URL}/menus/${menuId}`, {
-				method: "DELETE",
-				headers: {
-					"X-CSRF-Token": MOCK_CSRF_TOKEN,
-				},
-			})
+			expect(global.fetch).toHaveBeenCalledWith(
+				`${API_BASE_URL}/menus/${menuId}`,
+				{
+					method: "DELETE",
+					headers: {
+						"X-CSRF-Token": MOCK_CSRF_TOKEN,
+					},
+				}
+			)
 			expect(result).toEqual(responseData)
 		})
 
@@ -359,7 +373,9 @@ describe("apiService", () => {
 			const result = await apiService.fetchMenuItems(menuId)
 
 			// Assert
-			expect(global.fetch).toHaveBeenCalledWith(`${API_BASE_URL}/menus/${menuId}/menu_items`)
+			expect(global.fetch).toHaveBeenCalledWith(
+				`${API_BASE_URL}/menus/${menuId}/menu_items`
+			)
 			expect(result).toEqual(menuItemsData)
 		})
 
@@ -375,7 +391,9 @@ describe("apiService", () => {
 			})
 
 			// Act & Assert
-			await expect(apiService.fetchMenuItems(menuId)).rejects.toEqual(errorMessage)
+			await expect(apiService.fetchMenuItems(menuId)).rejects.toEqual(
+				errorMessage
+			)
 		})
 	})
 
@@ -414,7 +432,9 @@ describe("apiService", () => {
 			})
 
 			// Act & Assert
-			await expect(apiService.fetchMenuItem(menuId, itemId)).rejects.toEqual(errorMessage)
+			await expect(apiService.fetchMenuItem(menuId, itemId)).rejects.toEqual(
+				errorMessage
+			)
 		})
 	})
 
@@ -434,14 +454,17 @@ describe("apiService", () => {
 			const result = await apiService.createMenuItem(menuId, newItem)
 
 			// Assert
-			expect(global.fetch).toHaveBeenCalledWith(`${API_BASE_URL}/menus/${menuId}/menu_items`, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-					"X-CSRF-Token": MOCK_CSRF_TOKEN,
-				},
-				body: JSON.stringify(newItem),
-			})
+			expect(global.fetch).toHaveBeenCalledWith(
+				`${API_BASE_URL}/menus/${menuId}/menu_items`,
+				{
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+						"X-CSRF-Token": MOCK_CSRF_TOKEN,
+					},
+					body: JSON.stringify(newItem),
+				}
+			)
 			expect(result).toEqual(responseData)
 		})
 
@@ -458,7 +481,9 @@ describe("apiService", () => {
 			})
 
 			// Act & Assert
-			await expect(apiService.createMenuItem(menuId, invalidItem)).rejects.toEqual(errorMessage)
+			await expect(
+				apiService.createMenuItem(menuId, invalidItem)
+			).rejects.toEqual(errorMessage)
 		})
 	})
 
@@ -476,7 +501,11 @@ describe("apiService", () => {
 			})
 
 			// Act
-			const result = await apiService.updateMenuItem(menuId, itemId, itemUpdates)
+			const result = await apiService.updateMenuItem(
+				menuId,
+				itemId,
+				itemUpdates
+			)
 
 			// Assert
 			expect(global.fetch).toHaveBeenCalledWith(
@@ -507,9 +536,9 @@ describe("apiService", () => {
 			})
 
 			// Act & Assert
-			await expect(apiService.updateMenuItem(menuId, itemId, invalidUpdates)).rejects.toEqual(
-				errorMessage
-			)
+			await expect(
+				apiService.updateMenuItem(menuId, itemId, invalidUpdates)
+			).rejects.toEqual(errorMessage)
 		})
 	})
 
@@ -554,7 +583,9 @@ describe("apiService", () => {
 			})
 
 			// Act & Assert
-			await expect(apiService.deleteMenuItem(menuId, itemId)).rejects.toEqual(errorMessage)
+			await expect(apiService.deleteMenuItem(menuId, itemId)).rejects.toEqual(
+				errorMessage
+			)
 		})
 
 		it("should handle server error during item deletion", async () => {
@@ -570,7 +601,9 @@ describe("apiService", () => {
 			})
 
 			// Act & Assert
-			await expect(apiService.deleteMenuItem(menuId, itemId)).rejects.toEqual(errorMessage)
+			await expect(apiService.deleteMenuItem(menuId, itemId)).rejects.toEqual(
+				errorMessage
+			)
 		})
 	})
 

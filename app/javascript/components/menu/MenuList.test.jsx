@@ -1,5 +1,5 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react"
-import { BrowserRouter as Router } from "react-router-dom"
+import { MemoryRouter, Route, Routes } from "react-router-dom"
 import "@testing-library/jest-dom"
 
 // Mock the DOM for CSRF Token before importing apiService
@@ -39,7 +39,11 @@ describe("MenuList Component", () => {
 	// Sample menu data for testing
 	const mockMenus = [
 		{ id: 1, name: "Lunch Menu", menu_items: [] },
-		{ id: 2, name: "Dinner Menu", menu_items: [{ id: 1, name: "Pizza", price: 10.99 }] },
+		{
+			id: 2,
+			name: "Dinner Menu",
+			menu_items: [{ id: 1, name: "Pizza", price: 10.99 }],
+		},
 	]
 
 	beforeEach(() => {
@@ -60,9 +64,14 @@ describe("MenuList Component", () => {
 		api.fetchMenus.mockImplementation(() => new Promise(() => {}))
 
 		render(
-			<Router>
-				<MenuList />
-			</Router>
+			<MemoryRouter initialEntries={["/restaurants/123/menus"]}>
+				<Routes>
+					<Route
+						path="/restaurants/:restaurantId/menus"
+						element={<MenuList />}
+					/>
+				</Routes>
+			</MemoryRouter>
 		)
 
 		expect(screen.getByTestId("loading")).toBeInTheDocument()
@@ -70,9 +79,14 @@ describe("MenuList Component", () => {
 
 	it("renders menus after successful fetch", async () => {
 		render(
-			<Router>
-				<MenuList />
-			</Router>
+			<MemoryRouter initialEntries={["/restaurants/123/menus"]}>
+				<Routes>
+					<Route
+						path="/restaurants/:restaurantId/menus"
+						element={<MenuList />}
+					/>
+				</Routes>
+			</MemoryRouter>
 		)
 
 		await waitFor(() => {
@@ -81,15 +95,23 @@ describe("MenuList Component", () => {
 		expect(screen.getByTestId("menu-list")).toBeInTheDocument()
 		expect(screen.getByText("Lunch Menu")).toBeInTheDocument()
 		expect(screen.getByText("Dinner Menu")).toBeInTheDocument()
+		expect(screen.getByTestId("view-menu-1").getAttribute("href")).toBe(
+			"/restaurants/123/menus/1"
+		)
 	})
 
 	it("renders error message if menu fetch fails", async () => {
 		api.fetchMenus.mockRejectedValue(new Error("Faild to load menus"))
 
 		render(
-			<Router>
-				<MenuList />
-			</Router>
+			<MemoryRouter initialEntries={["/restaurants/123/menus"]}>
+				<Routes>
+					<Route
+						path="/restaurants/:restaurantId/menus"
+						element={<MenuList />}
+					/>
+				</Routes>
+			</MemoryRouter>
 		)
 
 		await waitFor(() => {
@@ -105,9 +127,14 @@ describe("MenuList Component", () => {
 		jest.spyOn(window, "confirm").mockReturnValue(false)
 
 		render(
-			<Router>
-				<MenuList />
-			</Router>
+			<MemoryRouter initialEntries={["/restaurants/123/menus"]}>
+				<Routes>
+					<Route
+						path="/restaurants/:restaurantId/menus"
+						element={<MenuList />}
+					/>
+				</Routes>
+			</MemoryRouter>
 		)
 
 		await waitFor(() => {
@@ -133,9 +160,14 @@ describe("MenuList Component", () => {
 		jest.spyOn(window, "confirm").mockReturnValue(true)
 
 		render(
-			<Router>
-				<MenuList />
-			</Router>
+			<MemoryRouter initialEntries={["/restaurants/123/menus"]}>
+				<Routes>
+					<Route
+						path="/restaurants/:restaurantId/menus"
+						element={<MenuList />}
+					/>
+				</Routes>
+			</MemoryRouter>
 		)
 
 		await waitFor(() => {
@@ -160,9 +192,14 @@ describe("MenuList Component", () => {
 		jest.spyOn(window, "confirm").mockReturnValue(true)
 
 		render(
-			<Router>
-				<MenuList />
-			</Router>
+			<MemoryRouter initialEntries={["/restaurants/123/menus"]}>
+				<Routes>
+					<Route
+						path="/restaurants/:restaurantId/menus"
+						element={<MenuList />}
+					/>
+				</Routes>
+			</MemoryRouter>
 		)
 
 		await waitFor(() => {

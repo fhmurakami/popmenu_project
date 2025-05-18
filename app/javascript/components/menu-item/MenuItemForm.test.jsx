@@ -30,6 +30,7 @@ jest.mock("../../services/apiService", () => ({
 }))
 
 describe("MenuItemForm Component", () => {
+	const mockRestaurantId = 333
 	const mockMenuId = 123
 	const mockOnSave = jest.fn()
 
@@ -101,7 +102,13 @@ describe("MenuItemForm Component", () => {
 
 		createMenuItem.mockResolvedValue(newItem)
 
-		render(<MenuItemForm menuId={mockMenuId} onSave={mockOnSave} />)
+		render(
+			<MenuItemForm
+				restaurantId={mockRestaurantId}
+				menuId={mockMenuId}
+				onSave={mockOnSave}
+			/>
+		)
 
 		// Fill out form
 		await user.type(screen.getByTestId("item-name-input"), "Test Item")
@@ -112,11 +119,15 @@ describe("MenuItemForm Component", () => {
 
 		// Wait for API call to resolve
 		await waitFor(() => {
-			expect(createMenuItem).toHaveBeenCalledWith(mockMenuId, {
-				name: "Test Item",
-				price: 9.99,
-				menu_id: mockMenuId,
-			})
+			expect(createMenuItem).toHaveBeenCalledWith(
+				mockRestaurantId,
+				mockMenuId,
+				{
+					name: "Test Item",
+					price: 9.99,
+					menu_id: mockMenuId,
+				}
+			)
 			expect(mockOnSave).toHaveBeenCalledWith(newItem)
 			expect(screen.getByTestId("item-name-input").value).toBe("")
 			expect(screen.getByTestId("item-price-input").value).toBe("")

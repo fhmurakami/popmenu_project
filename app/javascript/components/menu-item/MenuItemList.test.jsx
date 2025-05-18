@@ -1,5 +1,4 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react"
-import userEvent from "@testing-library/user-event"
 import "@testing-library/jest-dom"
 
 // Mock the DOM for CSRF Token before importing apiService
@@ -47,6 +46,7 @@ jest.mock("./MenuItemForm", () => {
 })
 
 describe("MenuItemList Component", () => {
+	const mockRestaurantId = 1
 	const mockMenuId = 1
 	const mockMenuItems = [
 		{ id: 1, name: "Burger", price: 10.99 },
@@ -69,6 +69,7 @@ describe("MenuItemList Component", () => {
 	it("renders menu items correctly", () => {
 		render(
 			<MenuItemList
+				restaurantId={mockRestaurantId}
 				menuId={mockMenuId}
 				menuItems={mockMenuItems}
 				onUpdateMenuItems={mockUpdateMenuItems}
@@ -82,10 +83,62 @@ describe("MenuItemList Component", () => {
 		expect(screen.getByText("$12.99")).toBeInTheDocument()
 	})
 
+	it("renders optional item fields like description, ingredients, and dietary restrictions", () => {
+		const itemsWithDetails = [
+			{
+				id: 1,
+				name: "Salad",
+				price: 7.25,
+				description: "Fresh garden salad",
+				ingredients: "Lettuce, tomato, cucumber",
+				dietary_restrictions: "Vegan",
+			},
+		]
+
+		render(
+			<MenuItemList
+				restaurantId={mockRestaurantId}
+				menuId={mockMenuId}
+				menuItems={itemsWithDetails}
+				onUpdateMenuItems={mockUpdateMenuItems}
+			/>
+		)
+
+		expect(screen.getByText("Salad")).toBeInTheDocument()
+		expect(screen.getByText("Fresh garden salad")).toBeInTheDocument()
+		expect(screen.getByText("Lettuce, tomato, cucumber")).toBeInTheDocument()
+		expect(screen.getByText(/Dietary Restrictions:/)).toBeInTheDocument()
+		expect(screen.getByText("Vegan")).toBeInTheDocument()
+	})
+
+	it('does not display "Dietary Restrictions" label if value is "None"', () => {
+		const itemsWithNone = [
+			{
+				id: 1,
+				name: "Ice Cream",
+				price: 5.0,
+				dietary_restrictions: "None",
+			},
+		]
+
+		render(
+			<MenuItemList
+				restaurantId={mockRestaurantId}
+				menuId={mockMenuId}
+				menuItems={itemsWithNone}
+				onUpdateMenuItems={mockUpdateMenuItems}
+			/>
+		)
+
+		expect(screen.getByText("Ice Cream")).toBeInTheDocument()
+		expect(screen.queryByText(/Dietary Restrictions/)).not.toBeInTheDocument()
+	})
+
 	// Edge case - empty menu items
 	it("renders empty state when no items exist", () => {
 		render(
 			<MenuItemList
+				restaurantId={mockRestaurantId}
 				menuId={mockMenuId}
 				menuItems={[]}
 				onUpdateMenuItems={mockUpdateMenuItems}
@@ -96,10 +149,34 @@ describe("MenuItemList Component", () => {
 		expect(screen.getByText("No items in this menu")).toBeInTheDocument()
 	})
 
+	it("renders correctly in readOnly mode without action buttons", () => {
+		const readOnlyItems = [{ id: 1, name: "Sushi", price: 18.5 }]
+
+		render(
+			<MenuItemList
+				restaurantId={mockRestaurantId}
+				menuId={mockMenuId}
+				menuItems={readOnlyItems}
+				onUpdateMenuItems={mockUpdateMenuItems}
+				readOnly={true}
+			/>
+		)
+
+		// Should not render add item button or card-header
+		expect(screen.queryByTestId("toggle-add-item")).not.toBeInTheDocument()
+
+		// Should not show remove buttons
+		expect(screen.queryByTestId("delete-item-1")).not.toBeInTheDocument()
+
+		// Still renders item
+		expect(screen.getByText("Sushi")).toBeInTheDocument()
+	})
+
 	// User interaction test
 	it("toggles add item form visibility when button clicked", () => {
 		render(
 			<MenuItemList
+				restaurantId={mockRestaurantId}
 				menuId={mockMenuId}
 				menuItems={mockMenuItems}
 				onUpdateMenuItems={mockUpdateMenuItems}
@@ -124,6 +201,7 @@ describe("MenuItemList Component", () => {
 	it("adds a new menu item successfully", () => {
 		render(
 			<MenuItemList
+				restaurantId={mockRestaurantId}
 				menuId={mockMenuId}
 				menuItems={mockMenuItems}
 				onUpdateMenuItems={mockUpdateMenuItems}
@@ -154,6 +232,7 @@ describe("MenuItemList Component", () => {
 
 		render(
 			<MenuItemList
+				restaurantId={mockRestaurantId}
 				menuId={mockMenuId}
 				menuItems={mockMenuItems}
 				onUpdateMenuItems={mockUpdateMenuItems}
@@ -170,7 +249,11 @@ describe("MenuItemList Component", () => {
 
 		// Wait for API call to resolve
 		await waitFor(() => {
-			expect(deleteMenuItem).toHaveBeenCalledWith(mockMenuId, 1)
+			expect(deleteMenuItem).toHaveBeenCalledWith(
+				mockRestaurantId,
+				mockMenuId,
+				1
+			)
 			expect(mockUpdateMenuItems).toHaveBeenCalledWith([mockMenuItems[1]])
 		})
 	})
@@ -182,6 +265,7 @@ describe("MenuItemList Component", () => {
 
 		render(
 			<MenuItemList
+				restaurantId={mockRestaurantId}
 				menuId={mockMenuId}
 				menuItems={mockMenuItems}
 				onUpdateMenuItems={mockUpdateMenuItems}
@@ -212,6 +296,7 @@ describe("MenuItemList Component", () => {
 
 		render(
 			<MenuItemList
+				restaurantId={mockRestaurantId}
 				menuId={mockMenuId}
 				menuItems={mockMenuItems}
 				onUpdateMenuItems={mockUpdateMenuItems}
@@ -246,6 +331,7 @@ describe("MenuItemList Component", () => {
 
 		render(
 			<MenuItemList
+				restaurantId={mockRestaurantId}
 				menuId={mockMenuId}
 				menuItems={itemsWithDifferentPrices}
 				onUpdateMenuItems={mockUpdateMenuItems}

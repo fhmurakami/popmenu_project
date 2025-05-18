@@ -15,49 +15,49 @@ const handleResponse = async (response) => {
 	return response.json()
 }
 
-// === Menu API CALLS ===
+// === Restaurant API CALLS ===
 
-// Fetch all menus
-export const fetchMenus = async () => {
-	const response = await fetch(`${API_BASE_URL}/menus`)
+// Fetch all restaurants
+export const fetchRestaurants = async () => {
+	const response = await fetch(`${API_BASE_URL}/restaurants`)
 	return handleResponse(response)
 }
 
-// Fetch a single menu by ID
-export const fetchMenu = async (id) => {
-	const response = await fetch(`${API_BASE_URL}/menus/${id}`)
+// Fetch a single restaurant by ID
+export const fetchRestaurant = async (restaurantId) => {
+	const response = await fetch(`${API_BASE_URL}/restaurants/${restaurantId}`)
 	return handleResponse(response)
 }
 
-// Create a new menu
-export const createMenu = async (menuData) => {
-	const response = await fetch(`${API_BASE_URL}/menus`, {
+// Create a new restaurant
+export const createRestaurant = async (restaurantData) => {
+	const response = await fetch(`${API_BASE_URL}/restaurants`, {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",
 			"X-CSRF-Token": csrfToken,
 		},
-		body: JSON.stringify({ menu: menuData }),
+		body: JSON.stringify({ restaurant: restaurantData }),
 	})
 	return handleResponse(response)
 }
 
-// Update an existing menu
-export const updateMenu = async (id, menuData) => {
-	const response = await fetch(`${API_BASE_URL}/menus/${id}`, {
+// Update an existing restaurant
+export const updateRestaurant = async (restaurantId, restaurantData) => {
+	const response = await fetch(`${API_BASE_URL}/restaurants/${restaurantId}`, {
 		method: "PUT",
 		headers: {
 			"Content-Type": "application/json",
 			"X-CSRF-Token": csrfToken,
 		},
-		body: JSON.stringify({ menu: menuData }),
+		body: JSON.stringify({ restaurant: restaurantData }),
 	})
 	return handleResponse(response)
 }
 
-// Delete a menu
-export const deleteMenu = async (id) => {
-	const response = await fetch(`${API_BASE_URL}/menus/${id}`, {
+// Delete a restaurant
+export const deleteRestaurant = async (restaurantId) => {
+	const response = await fetch(`${API_BASE_URL}/restaurants/${restaurantId}`, {
 		method: "DELETE",
 		headers: {
 			"X-CSRF-Token": csrfToken,
@@ -67,35 +67,110 @@ export const deleteMenu = async (id) => {
 	return handleResponse(response)
 }
 
-// === MenuItem API CALLS ===
-export const fetchMenuItems = async (menuId) => {
-	const response = await fetch(`${API_BASE_URL}/menus/${menuId}/menu_items`)
-	return handleResponse(response)
-}
+// === Menu API CALLS ===
 
-export const fetchMenuItem = async (menuId, itemId) => {
+// Fetch all menus
+export const fetchMenus = async (restaurantId) => {
 	const response = await fetch(
-		`${API_BASE_URL}/menus/${menuId}/menu_items/${itemId}`
+		`${API_BASE_URL}/restaurants/${restaurantId}/menus`
 	)
 	return handleResponse(response)
 }
 
-export const createMenuItem = async (menuId, itemData) => {
-	const response = await fetch(`${API_BASE_URL}/menus/${menuId}/menu_items`, {
-		method: "POST",
-		headers: {
-			"Content-Type": "application/json",
-			"X-CSRF-Token": csrfToken,
-		},
-		body: JSON.stringify({ menu_item: itemData }),
-	})
+// Fetch a single menu by ID
+export const fetchMenu = async (restaurantId, menuId) => {
+	const response = await fetch(
+		`${API_BASE_URL}/restaurants/${restaurantId}/menus/${menuId}`
+	)
+	return handleResponse(response)
+}
+
+// Create a new menu
+export const createMenu = async (restaurantId, menuData) => {
+	const response = await fetch(
+		`${API_BASE_URL}/restaurants/${restaurantId}/menus`,
+		{
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				"X-CSRF-Token": csrfToken,
+			},
+			body: JSON.stringify({ menu: menuData }),
+		}
+	)
+	return handleResponse(response)
+}
+
+// Update an existing menu
+export const updateMenu = async (restaurantId, menuId, menuData) => {
+	const response = await fetch(
+		`${API_BASE_URL}/restaurants/${restaurantId}/menus/${menuId}`,
+		{
+			method: "PUT",
+			headers: {
+				"Content-Type": "application/json",
+				"X-CSRF-Token": csrfToken,
+			},
+			body: JSON.stringify({ menu: menuData }),
+		}
+	)
+	return handleResponse(response)
+}
+
+// Delete a menu
+export const deleteMenu = async (restaurantId, menuId) => {
+	const response = await fetch(
+		`${API_BASE_URL}/restaurants/${restaurantId}/menus/${menuId}`,
+		{
+			method: "DELETE",
+			headers: {
+				"X-CSRF-Token": csrfToken,
+			},
+		}
+	)
 
 	return handleResponse(response)
 }
 
-export const updateMenuItem = async (menuId, itemId, itemData) => {
+// === MenuItem API CALLS ===
+export const fetchMenuItems = async (restaurantId, menuId) => {
 	const response = await fetch(
-		`${API_BASE_URL}/menus/${menuId}/menu_items/${itemId}`,
+		`${API_BASE_URL}/restaurants/${restaurantId}/menus/${menuId}/menu_items`
+	)
+	return handleResponse(response)
+}
+
+export const fetchMenuItem = async (restaurantId, menuId, itemId) => {
+	const response = await fetch(
+		`${API_BASE_URL}/restaurants/${restaurantId}/menus/${menuId}/menu_items/${itemId}`
+	)
+	return handleResponse(response)
+}
+
+export const createMenuItem = async (restaurantId, menuId, itemData) => {
+	const response = await fetch(
+		`${API_BASE_URL}/restaurants/${restaurantId}/menus/${menuId}/menu_items`,
+		{
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				"X-CSRF-Token": csrfToken,
+			},
+			body: JSON.stringify({ menu_item: itemData }),
+		}
+	)
+
+	return handleResponse(response)
+}
+
+export const updateMenuItem = async (
+	restaurantId,
+	menuId,
+	itemId,
+	itemData
+) => {
+	const response = await fetch(
+		`${API_BASE_URL}/restaurants/${restaurantId}/menus/${menuId}/menu_items/${itemId}`,
 		{
 			method: "PUT",
 			headers: {
@@ -109,9 +184,9 @@ export const updateMenuItem = async (menuId, itemId, itemData) => {
 	return handleResponse(response)
 }
 
-export const deleteMenuItem = async (menuId, itemId) => {
+export const deleteMenuItem = async (restaurantId, menuId, itemId) => {
 	const response = await fetch(
-		`${API_BASE_URL}/menus/${menuId}/menu_items/${itemId}`,
+		`${API_BASE_URL}/restaurants/${restaurantId}/menus/${menuId}/menu_items/${itemId}`,
 		{
 			method: "DELETE",
 			headers: {

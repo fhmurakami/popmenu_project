@@ -48,5 +48,7 @@ module PopmenuProject
         view_specs: false
       )
     end
+
+    config.asset_pipeline = :propshaft
   end
 end

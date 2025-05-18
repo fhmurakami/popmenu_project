@@ -1,57 +1,70 @@
 import React, { useState, useEffect } from "react"
-import { useParams, useNavigate } from "react-router-dom"
-import { fetchMenu, createMenu, updateMenu } from "../../services/apiService"
+import { useNavigate, useParams } from "react-router-dom"
+import {
+	fetchRestaurant,
+	createRestaurant,
+	updateRestaurant,
+} from "../../services/apiService"
 
-function MenuForm() {
-	const { id } = useParams()
+const RestaurantForm = ({ isEditing = false }) => {
 	const navigate = useNavigate()
-	const [formData, setFormData] = useState({ name: "" })
-	const [loading, setLoading] = useState(false)
+	const { id } = useParams()
+	const [formData, setFormData] = useState({
+		name: "",
+	})
+	const [loading, setLoading] = useState(isEditing)
 	const [error, setError] = useState(null)
-	const isEditing = !!id
 
 	useEffect(() => {
 		if (isEditing) {
-			const getMenu = async () => {
+			const loadRestaurant = async () => {
 				try {
 					setLoading(true)
-					const data = await fetchMenu(id)
+					const data = await fetchRestaurant(id)
 					setFormData({ name: data.name })
 					setLoading(false)
 				} catch (error) {
-					setError("Failed to load menu")
+					setError("Failed to load restaurant")
 					setLoading(false)
 				}
 			}
 
-			getMenu()
+			loadRestaurant()
 		}
 	}, [id, isEditing])
 
 	const handleChange = (e) => {
 		const { name, value } = e.target
-		setFormData({ ...formData, [name]: value })
+		setFormData({
+			...formData,
+			[name]: value,
+		})
 	}
 
 	const handleSubmit = async (e) => {
 		e.preventDefault()
+
+		if (!formData.name || formData.name.trim() === "") {
+			setError("Restaurant name is required")
+			return
+		}
+
 		try {
 			setLoading(true)
-
 			if (isEditing) {
-				await updateMenu(id, formData)
+				await updateRestaurant(id, formData)
+				navigate(`/restaurants/${id}`)
 			} else {
-				await createMenu(formData)
+				const data = await createRestaurant(formData)
+				navigate(`/restaurants/${data.id}`)
 			}
-
-			navigate("/menus")
 		} catch (error) {
-			setError(`Failed to ${isEditing ? "update" : "create"} menu`)
+			setError(`Failed to ${isEditing ? "update" : "create"} restaurant`)
 			setLoading(false)
 		}
 	}
 
-	if (loading && isEditing) {
+	if (loading && isEditing && !formData.name) {
 		return (
 			<div className="text-center mt-5" data-testid="loading">
 				<div className="spinner-border"></div>
@@ -62,7 +75,9 @@ function MenuForm() {
 	return (
 		<div className="card">
 			<div className="card-header">
-				<h3 data-testid="form-title">{isEditing ? "Edit Menu" : "Create New Menu"}</h3>
+				<h3 data-testid="form-title">
+					{isEditing ? "Edit Restaurant" : "Create New Restaurant"}
+				</h3>
 			</div>
 			<div className="card-body">
 				{error && (
@@ -71,10 +86,10 @@ function MenuForm() {
 					</div>
 				)}
 
-				<form onSubmit={handleSubmit} data-testid="menu-form">
+				<form onSubmit={handleSubmit} data-testid="restaurant-form">
 					<div className="mb-3">
 						<label htmlFor="name" className="form-label">
-							Menu Name
+							Restaurant Name
 						</label>
 						<input
 							type="text"
@@ -84,7 +99,7 @@ function MenuForm() {
 							value={formData.name}
 							onChange={handleChange}
 							required
-							data-testid="menu-name-input"
+							data-testid="restaurant-name-input"
 						/>
 					</div>
 
@@ -92,7 +107,9 @@ function MenuForm() {
 						<button
 							type="button"
 							className="btn btn-outline-secondary"
-							onClick={() => navigate("/menus")}
+							onClick={() =>
+								navigate(isEditing ? `/restaurants/${id}` : "/restaurants")
+							}
 							data-testid="cancel-button"
 						>
 							Cancel
@@ -109,9 +126,9 @@ function MenuForm() {
 									Saving...
 								</>
 							) : isEditing ? (
-								"Update Menu"
+								"Update Restaurant"
 							) : (
-								"Create Menu"
+								"Create Restaurant"
 							)}
 						</button>
 					</div>
@@ -121,4 +138,4 @@ function MenuForm() {
 	)
 }
 
-export default MenuForm
+export default RestaurantForm

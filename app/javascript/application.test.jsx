@@ -1,6 +1,5 @@
 // Mock imports before they happen in the module
 jest.mock("@hotwired/turbo-rails", () => ({}))
-jest.mock("./controllers", () => ({}))
 jest.mock("react-dom/client", () => ({
 	createRoot: jest.fn(() => ({
 		render: jest.fn(),
@@ -19,7 +18,6 @@ document.addEventListener = jest.fn((event, callback) => {
 })
 
 import "@hotwired/turbo-rails"
-import "./controllers"
 import { createRoot } from "react-dom/client"
 import App from "./components/App"
 

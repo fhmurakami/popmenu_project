@@ -1,5 +1,6 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react"
-import { BrowserRouter as Router } from "react-router-dom"
+import { MemoryRouter, Route, Routes, useParams } from "react-router-dom"
+import { renderWithRoute } from "../../tests/testUtils"
 import "@testing-library/jest-dom"
 
 // Mock CSRF Token
@@ -21,7 +22,7 @@ jest.mock("react-router-dom", () => ({
 }))
 
 // Mock the MenuItemList component
-jest.mock("../MenuItem/MenuItemList", () => {
+jest.mock("../menu-item/MenuItemList", () => {
 	return ({ menuId, menuItems, onUpdateMenuItems }) => (
 		<div data-testid="mock-menu-item-list">
 			<span data-testid="menu-id">{menuId}</span>
@@ -41,7 +42,7 @@ jest.mock("../MenuItem/MenuItemList", () => {
 	)
 })
 
-import MenuDetail from "./MenuDetail"
+import MenuInfo from "./MenuInfo"
 import * as api from "../../services/apiService"
 
 jest.mock("../../services/apiService", () => ({
@@ -49,7 +50,7 @@ jest.mock("../../services/apiService", () => ({
 	deleteMenu: jest.fn(),
 }))
 
-describe("MenuDetail Component", () => {
+describe("MenuInfo Component", () => {
 	const mockMenu = {
 		id: 1,
 		name: "Lunch Menu",
@@ -64,7 +65,7 @@ describe("MenuDetail Component", () => {
 
 		// Ensure the default mocks
 		api.fetchMenu.mockResolvedValue(mockMenu)
-		require("react-router-dom").useParams.mockReturnValue({ id: "1" })
+		useParams.mockReturnValue({ menuId: "1", restaurantId: "123" })
 		require("react-router-dom").useNavigate.mockReturnValue(mockNavigate)
 	})
 
@@ -72,20 +73,20 @@ describe("MenuDetail Component", () => {
 		// Keeps the loading state
 		api.fetchMenu.mockImplementation(() => new Promise(() => {}))
 
-		render(
-			<Router>
-				<MenuDetail />
-			</Router>
+		renderWithRoute(
+			<MenuInfo />,
+			"/restaurants/123/menus/1",
+			"/restaurants/:restaurantId/menus/:menuId"
 		)
 
 		expect(screen.getByTestId("loading")).toBeInTheDocument()
 	})
 
 	it("renders menu details after successful fetch", async () => {
-		render(
-			<Router>
-				<MenuDetail />
-			</Router>
+		renderWithRoute(
+			<MenuInfo />,
+			"/restaurants/123/menus/1",
+			"/restaurants/:restaurantId/menus/:menuId"
 		)
 
 		await waitFor(() => {
@@ -99,12 +100,13 @@ describe("MenuDetail Component", () => {
 	})
 
 	it("renders error message if menu fetch fails", async () => {
+		const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {})
 		api.fetchMenu.mockRejectedValue(new Error("Failed to load menu details"))
 
-		render(
-			<Router>
-				<MenuDetail />
-			</Router>
+		renderWithRoute(
+			<MenuInfo />,
+			"/restaurants/123/menus/1",
+			"/restaurants/:restaurantId/menus/:menuId"
 		)
 
 		await waitFor(() => {
@@ -117,10 +119,10 @@ describe("MenuDetail Component", () => {
 	it("renders no menu found message when menu is null", async () => {
 		api.fetchMenu.mockResolvedValue(null)
 
-		render(
-			<Router>
-				<MenuDetail />
-			</Router>
+		renderWithRoute(
+			<MenuInfo />,
+			"/restaurants/123/menus/1",
+			"/restaurants/:restaurantId/menus/:menuId"
 		)
 
 		await waitFor(() => {
@@ -134,10 +136,10 @@ describe("MenuDetail Component", () => {
 		api.deleteMenu.mockResolvedValue({})
 		jest.spyOn(window, "confirm").mockReturnValue(true)
 
-		render(
-			<Router>
-				<MenuDetail />
-			</Router>
+		renderWithRoute(
+			<MenuInfo />,
+			"/restaurants/123/menus/1",
+			"/restaurants/:restaurantId/menus/:menuId"
 		)
 
 		await waitFor(() => {
@@ -148,8 +150,8 @@ describe("MenuDetail Component", () => {
 		fireEvent.click(deleteButton)
 
 		await waitFor(() => {
-			expect(api.deleteMenu).toHaveBeenCalledWith("1")
-			expect(mockNavigate).toHaveBeenCalledWith("/menus")
+			expect(api.deleteMenu).toHaveBeenCalledWith("123", "1")
+			expect(mockNavigate).toHaveBeenCalledWith("/restaurants/123/menus")
 		})
 
 		window.confirm.mockRestore()
@@ -159,10 +161,10 @@ describe("MenuDetail Component", () => {
 		api.deleteMenu.mockRejectedValue(new Error("Failed to delete menu"))
 		jest.spyOn(window, "confirm").mockReturnValue(true)
 
-		render(
-			<Router>
-				<MenuDetail />
-			</Router>
+		renderWithRoute(
+			<MenuInfo />,
+			"/restaurants/123/menus/1",
+			"/restaurants/:restaurantId/menus/:menuId"
 		)
 
 		await waitFor(() => {
@@ -183,10 +185,10 @@ describe("MenuDetail Component", () => {
 	it("does not delete menu if user cancels confirmation", async () => {
 		jest.spyOn(window, "confirm").mockReturnValue(false)
 
-		render(
-			<Router>
-				<MenuDetail />
-			</Router>
+		renderWithRoute(
+			<MenuInfo />,
+			"/restaurants/123/menus/1",
+			"/restaurants/:restaurantId/menus/:menuId"
 		)
 
 		await waitFor(() => {
@@ -204,10 +206,10 @@ describe("MenuDetail Component", () => {
 
 	// MenuItemList integration tests
 	it("renders the MenuItemList component with correct props", async () => {
-		render(
-			<Router>
-				<MenuDetail />
-			</Router>
+		renderWithRoute(
+			<MenuInfo />,
+			"/restaurants/123/menus/1",
+			"/restaurants/:restaurantId/menus/:menuId"
 		)
 
 		await waitFor(() => {
@@ -229,10 +231,10 @@ describe("MenuDetail Component", () => {
 			menu_items: null,
 		})
 
-		render(
-			<Router>
-				<MenuDetail />
-			</Router>
+		renderWithRoute(
+			<MenuInfo />,
+			"/restaurants/123/menus/1",
+			"/restaurants/:restaurantId/menus/:menuId"
 		)
 
 		await waitFor(() => {
@@ -244,10 +246,10 @@ describe("MenuDetail Component", () => {
 	})
 
 	it("updates menu items when updateMenuItems function is called", async () => {
-		render(
-			<Router>
-				<MenuDetail />
-			</Router>
+		renderWithRoute(
+			<MenuInfo />,
+			"/restaurants/123/menus/1",
+			"/restaurants/:restaurantId/menus/:menuId"
 		)
 
 		await waitFor(() => {
