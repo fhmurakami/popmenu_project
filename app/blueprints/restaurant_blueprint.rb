@@ -1,7 +1,7 @@
 class RestaurantBlueprint < Blueprinter::Base
   identifier :id
 
-  field :name
+  fields :name, :address, :phone, :website, :description
 
   association :menus, blueprint: MenuBlueprint
 end
