@@ -83,11 +83,6 @@ jobs:
           path: coverage/
           retention-days: 7
 
-      - name: Print test coverage summary
-        run: |
-          cat coverage/.last_run.json | jq '.result.line_coverage'
-          cat coverage/index.html | grep -A 5 "Coverage report generated"
-
       - name: Run Jest tests
         run: yarn test --ci --coverage
 
