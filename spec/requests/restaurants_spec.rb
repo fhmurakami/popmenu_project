@@ -88,5 +88,20 @@ RSpec.describe "/restaurants", type: :request do
         delete api_v1_restaurant_url(restaurant), as: :json
       }.to change(Restaurant, :count).by(-1)
     end
+
+    context "when an error occurs while deleting" do
+      it "returns an unprocessable entity (422) status code" do
+        # Arrange
+        restaurant = instance_double(Restaurant, destroy: false)
+        allow(Restaurant).to receive(:find).and_return(restaurant)
+        allow(restaurant).to receive(:errors).and_return("Unprocessable Entity")
+
+        # Act
+        delete api_v1_restaurant_url(restaurant)
+
+        # Assert
+        expect(response).to have_http_status(:unprocessable_entity)
+      end
+    end
   end
 end

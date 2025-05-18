@@ -5,13 +5,13 @@ class Api::V1::RestaurantsController < ApplicationController
   # GET /restaurants.json
   def index
     @restaurants = Restaurant.all
-    render json: @restaurants, include: { menus: { include: :menu_items } }
+    render json: RestaurantBlueprint.render(@restaurants)
   end
 
   # GET /restaurants/1
   # GET /restaurants/1.json
   def show
-    render json: @restaurant, include: { menus: { include: :menu_items } }
+    render json: RestaurantBlueprint.render(@restaurant)
   end
 
   # POST /restaurants
@@ -20,7 +20,7 @@ class Api::V1::RestaurantsController < ApplicationController
     @restaurant = Restaurant.new(restaurant_params)
 
     if @restaurant.save
-      render json: @restaurant, include: { menus: { include: :menu_items } }, status: :created
+      render json: RestaurantBlueprint.render(@restaurant), status: :created
     else
       render json: { errors: @restaurant.errors }, status: :unprocessable_entity
     end
@@ -30,7 +30,7 @@ class Api::V1::RestaurantsController < ApplicationController
   # PATCH/PUT /restaurants/1.json
   def update
     if @restaurant.update(restaurant_params)
-      render json: @restaurant, include: { menus: { include: :menu_items } }, status: :ok
+      render json: RestaurantBlueprint.render(@restaurant), status: :ok
     else
       render json: { errors: @restaurant.errors }, status: :unprocessable_entity
     end

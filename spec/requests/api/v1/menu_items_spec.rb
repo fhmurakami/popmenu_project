@@ -9,8 +9,8 @@ RSpec.describe "/menu_items", type: :request do
   let(:valid_attributes) {
     {
       menu_id: menu.id,
-      name: "Cheese Burguer",
-      description: "Delicious cheese burguer",
+      name: "Cheese Burger",
+      description: "Delicious cheese burger",
       price: 9.99,
       category: "Main Course",
       dietary_restrictions: "None",
@@ -44,11 +44,17 @@ RSpec.describe "/menu_items", type: :request do
     context "when menu items exist" do
       it "renders a successful response" do
         menu = create(:menu_with_items, menu_items_count: 3, restaurant:)
+        menu_entries = menu.menu_entries
 
         get api_v1_restaurant_menu_items_url(restaurant, menu), headers: valid_headers, as: :json
 
+        parsed_response = JSON.parse(response.body)
+
         expect(response).to be_successful
-        expect(JSON.parse(response.body).size).to eq(3)
+        expect(parsed_response.size).to eq(3)
+        expect(parsed_response.first["name"]).to eq("Menu Item 1")
+        expect(parsed_response.last["name"]).to eq("Menu Item 3")
+        expect(parsed_response.first["price"]).to eq(menu_entries.first.price.to_s)
       end
     end
   end
@@ -56,7 +62,7 @@ RSpec.describe "/menu_items", type: :request do
   describe "GET /show" do
     context "when the menu item does not exist" do
       it "returns a not found response (404)" do
-        get api_v1_restaurant_menu_item_url(restaurant, menu, id: -1), as: :json
+        get api_v1_restaurant_menu_item_url(restaurant, menu, id: 999), as: :json
         expect(response).to have_http_status(:not_found)
       end
     end
@@ -116,8 +122,12 @@ RSpec.describe "/menu_items", type: :request do
                params: { menu_item: valid_attributes }, headers: valid_headers, as: :json
           expect(response).to have_http_status(:created)
           expect(response.content_type).to match(a_string_including("application/json"))
-          expect(response.body).to include("menu_item")
-          expect(response.body).to include("menu_entry")
+          expect(response.body).to include('"name":"Cheese Burger"')
+          expect(response.body).to include('"price":"9.99"')
+          expect(response.body).to include('"description":"Delicious cheese burger"')
+          expect(response.body).to include('"category":"Main Course"')
+          expect(response.body).to include('"dietary_restrictions":"None"')
+          expect(response.body).to include('"ingredients":"Beef, Bread, Cheese, Lettuce, Tomato"')
         end
       end
 
@@ -183,6 +193,13 @@ RSpec.describe "/menu_items", type: :request do
   end
 
   describe "PATCH /update" do
+    context "when menu item does not exist" do
+      it "returns a 404" do
+        patch api_v1_restaurant_menu_item_url(restaurant, menu, 0)
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+
     context "with valid parameters" do
       let(:new_menu) { create(:menu, restaurant:) }
       let(:new_attributes) {
@@ -288,10 +305,24 @@ RSpec.describe "/menu_items", type: :request do
 
         expect(another_menu_entry.price).to eq(9.99)
         expect(another_menu_entry.menu_id).to eq(new_menu.id)
-        expect(another_menu_entry.description).to eq("Delicious cheese burguer")
+        expect(another_menu_entry.description).to eq("Delicious cheese burger")
         expect(another_menu_entry.category).to eq("Main Course")
         expect(another_menu_entry.dietary_restrictions).to eq("None")
         expect(another_menu_entry.ingredients).to eq("Beef, Bread, Cheese, Lettuce, Tomato")
+      end
+
+      context "with invalid parameters for menu entry" do
+        it "returns an unprocessable entity (422) status code" do
+          attributes = { name: "Valid Item Name" }
+          menu_item = create(:menu_item)
+
+          patch api_v1_restaurant_menu_item_url(restaurant, menu, menu_item),
+                params: { menu_item: attributes },
+                headers: valid_headers,
+                as: :json
+
+          expect(response).to have_http_status(:unprocessable_entity)
+        end
       end
     end
 
@@ -307,12 +338,34 @@ RSpec.describe "/menu_items", type: :request do
   end
 
   describe "DELETE /destroy" do
+    context "when the menu item does not exist" do
+      it "returns a 404" do
+        delete api_v1_restaurant_menu_item_url(restaurant, menu, 0)
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+
     it "destroys the requested menu_item" do
       menu_item = create(:menu_item)
       expect {
         delete api_v1_restaurant_menu_item_url(restaurant, menu, menu_item), headers: valid_headers, as: :json
       }.to change(MenuItem, :count).by(-1)
       expect(MenuItem.find_by(id: menu_item.id)).to be_nil
+    end
+
+    context "when an error occurs while deleting" do
+      it "returns an unprocessable entity (422) status code" do
+        # Arrange
+        menu_item = instance_double(MenuItem, destroy: false)
+        allow(MenuItem).to receive(:find_by).and_return(menu_item)
+        allow(menu_item).to receive(:errors).and_return("Unprocessable Entity")
+
+        # Act
+        delete api_v1_restaurant_menu_item_url(restaurant, menu, menu_item)
+
+        # Assert
+        expect(response).to have_http_status(:unprocessable_entity)
+      end
     end
   end
 end

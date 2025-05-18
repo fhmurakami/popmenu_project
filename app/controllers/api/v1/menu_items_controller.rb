@@ -5,13 +5,27 @@ class Api::V1::MenuItemsController < ApplicationController
   # GET /menu_items.json
   def index
     @menu_items = MenuItem.all
-    render json: @menu_items
+    menu_entries = MenuEntry.where(
+      menu_item_id: @menu_items.map(&:id),
+      menu_id: params[:menu_id]
+    ).index_by(&:menu_item_id)
+
+    render json: MenuItemBlueprint.render(@menu_items, menu_entries:)
   end
 
   # GET /menu_items/1
   # GET /menu_items/1.json
   def show
-    render json: @menu_item
+    if @menu_item
+      render json: MenuItemBlueprint.render(
+        @menu_item,
+        menu_entries: @menu_item.menu_entries
+          .where(menu_id: params[:menu_id])
+          .index_by(&:menu_item_id)
+      )
+    else
+      render json: { errors: "Menu item not found" }, status: :not_found
+    end
   end
 
   # POST /menu_items
@@ -28,7 +42,7 @@ class Api::V1::MenuItemsController < ApplicationController
       )
 
       if @menu_entry.save
-        render json: { menu_item: @menu_item, menu_entry: @menu_entry }, status: :created
+        render json: MenuItemBlueprint.render(@menu_item, menu_entry: @menu_entry), status: :created
       else
         render json: { errors: @menu_entry.errors }, status: :unprocessable_entity
       end
@@ -40,40 +54,44 @@ class Api::V1::MenuItemsController < ApplicationController
   # PATCH/PUT /menu_items/1
   # PATCH/PUT /menu_items/1.json
   def update
-    if @menu_item.update(name: menu_item_params[:name])
-      @menu_entry = MenuEntry.find_or_create_by(
-        menu_item_id: @menu_item.id,
-        menu_id: menu_item_params[:menu_id]
-      )
+    if @menu_item
+      if @menu_item.update(name: menu_item_params[:name])
+        @menu_entry = MenuEntry.find_or_create_by(
+          menu_item_id: @menu_item.id,
+          menu_id: menu_item_params[:menu_id]
+        )
 
-      if @menu_entry
         if @menu_entry.update(menu_item_params.except(:name))
-          render json: { menu_item: @menu_item, menu_entry: @menu_entry }, status: :ok
+          render json: MenuItemBlueprint.render(@menu_item, menu_entry: @menu_entry), status: :ok
         else
           render json: { errors: @menu_entry.errors }, status: :unprocessable_entity
         end
       else
-        render json: { errors: "Menu entry not found" }, status: :not_found
+        render json: { errors: @menu_item.errors }, status: :unprocessable_entity
       end
     else
-      render json: { errors: @menu_item.errors }, status: :unprocessable_entity
+      render json: { errors: "Menu item not found" }, status: :not_found
     end
   end
 
   # DELETE /menu_items/1
   # DELETE /menu_items/1.json
   def destroy
-    if @menu_item.destroy
-      render json: { message: "Item deleted successfully" }, status: :ok
+    if @menu_item
+      if @menu_item.destroy
+        render json: { message: "Item deleted successfully" }, status: :ok
+      else
+        render json: { errors: @menu_item.errors }, status: :unprocessable_entity
+      end
     else
-      render json: { errors: @menu.errors }, status: :unprocessable_entity
+      render json: { errors: "Menu item not found" }, status: :not_found
     end
   end
 
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_menu_item
-      @menu_item = MenuItem.find(params.expect(:id))
+      @menu_item = MenuItem.find_by(id: params.expect(:id))
     end
 
     # Only allow a list of trusted parameters through.
