@@ -2,7 +2,6 @@ import React, { useState } from "react"
 import { createMenuItem } from "../../services/apiService"
 
 function MenuItemForm({ restaurantId, menuId, onSave }) {
-	console.log("MenuItemForm props:", { restaurantId, menuId, onSave })
 	const [formData, setFormData] = useState({
 		name: "",
 		price: "",
