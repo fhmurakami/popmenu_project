@@ -253,5 +253,20 @@ RSpec.describe "/menus", type: :request do
       # Assert
       expect(Menu.find_by(id: menu.id)).to be_nil
     end
+
+    context "when an error occurs while deleting" do
+      it "returns an unprocessable entity (422) status code" do
+        # Arrange
+        menu = instance_double(Menu, destroy: false)
+        allow(Menu).to receive(:find).and_return(menu)
+        allow(menu).to receive(:errors).and_return("Unprocessable Entity")
+
+        # Act
+        delete api_v1_restaurant_menu_url(restaurant, menu)
+
+        # Assert
+        expect(response).to have_http_status(:unprocessable_entity)
+      end
+    end
   end
 end

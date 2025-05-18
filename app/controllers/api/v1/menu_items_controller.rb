@@ -61,14 +61,10 @@ class Api::V1::MenuItemsController < ApplicationController
           menu_id: menu_item_params[:menu_id]
         )
 
-        if @menu_entry
-          if @menu_entry.update(menu_item_params.except(:name))
-            render json: MenuItemBlueprint.render(@menu_item, menu_entry: @menu_entry), status: :ok
-          else
-            render json: { errors: @menu_entry.errors }, status: :unprocessable_entity
-          end
+        if @menu_entry.update(menu_item_params.except(:name))
+          render json: MenuItemBlueprint.render(@menu_item, menu_entry: @menu_entry), status: :ok
         else
-          render json: { errors: "Menu entry not found" }, status: :not_found
+          render json: { errors: @menu_entry.errors }, status: :unprocessable_entity
         end
       else
         render json: { errors: @menu_item.errors }, status: :unprocessable_entity
@@ -85,7 +81,7 @@ class Api::V1::MenuItemsController < ApplicationController
       if @menu_item.destroy
         render json: { message: "Item deleted successfully" }, status: :ok
       else
-        render json: { errors: @menu.errors }, status: :unprocessable_entity
+        render json: { errors: @menu_item.errors }, status: :unprocessable_entity
       end
     else
       render json: { errors: "Menu item not found" }, status: :not_found

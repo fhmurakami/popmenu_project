@@ -310,6 +310,20 @@ RSpec.describe "/menu_items", type: :request do
         expect(another_menu_entry.dietary_restrictions).to eq("None")
         expect(another_menu_entry.ingredients).to eq("Beef, Bread, Cheese, Lettuce, Tomato")
       end
+
+      context "with invalid parameters for menu entry" do
+        it "returns an unprocessable entity (422) status code" do
+          attributes = { name: "Valid Item Name" }
+          menu_item = create(:menu_item)
+
+          patch api_v1_restaurant_menu_item_url(restaurant, menu, menu_item),
+                params: { menu_item: attributes },
+                headers: valid_headers,
+                as: :json
+
+          expect(response).to have_http_status(:unprocessable_entity)
+        end
+      end
     end
 
     context "with invalid parameters" do
@@ -337,6 +351,21 @@ RSpec.describe "/menu_items", type: :request do
         delete api_v1_restaurant_menu_item_url(restaurant, menu, menu_item), headers: valid_headers, as: :json
       }.to change(MenuItem, :count).by(-1)
       expect(MenuItem.find_by(id: menu_item.id)).to be_nil
+    end
+
+    context "when an error occurs while deleting" do
+      it "returns an unprocessable entity (422) status code" do
+        # Arrange
+        menu_item = instance_double(MenuItem, destroy: false)
+        allow(MenuItem).to receive(:find_by).and_return(menu_item)
+        allow(menu_item).to receive(:errors).and_return("Unprocessable Entity")
+
+        # Act
+        delete api_v1_restaurant_menu_item_url(restaurant, menu, menu_item)
+
+        # Assert
+        expect(response).to have_http_status(:unprocessable_entity)
+      end
     end
   end
 end
