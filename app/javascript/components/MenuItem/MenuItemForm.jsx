@@ -1,7 +1,8 @@
 import React, { useState } from "react"
 import { createMenuItem } from "../../services/apiService"
 
-function MenuItemForm({ menuId, onSave }) {
+function MenuItemForm({ restaurantId, menuId, onSave }) {
+	console.log("MenuItemForm props:", { restaurantId, menuId, onSave })
 	const [formData, setFormData] = useState({
 		name: "",
 		price: "",
@@ -34,7 +35,7 @@ function MenuItemForm({ menuId, onSave }) {
 
 		try {
 			setLoading(true)
-			const newItem = await createMenuItem(menuId, formData)
+			const newItem = await createMenuItem(restaurantId, menuId, formData)
 			setFormData({ name: "", price: "", menu_id: menuId })
 			setLoading(false)
 			setError(null)

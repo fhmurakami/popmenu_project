@@ -1,5 +1,6 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react"
-import { BrowserRouter as Router } from "react-router-dom"
+import { screen, fireEvent, waitFor } from "@testing-library/react"
+import { renderWithRoute } from "../../tests/testUtils"
+import { act } from "react"
 import "@testing-library/jest-dom"
 
 const mockMetaElement = {
@@ -15,7 +16,6 @@ jest.spyOn(document, "querySelector").mockImplementation((selector) => {
 
 jest.mock("react-router-dom", () => ({
 	...jest.requireActual("react-router-dom"),
-	useParams: jest.fn(),
 	useNavigate: jest.fn(),
 }))
 
@@ -29,6 +29,7 @@ jest.mock("../../services/apiService", () => ({
 }))
 
 describe("MenuForm Component", () => {
+	const restaurantId = 123
 	const mockMenu = {
 		id: 1,
 		name: "Lunch Menu",
@@ -37,58 +38,50 @@ describe("MenuForm Component", () => {
 	const mockNavigate = jest.fn()
 
 	beforeEach(() => {
-		jest.resetAllMocks()
 		jest.clearAllMocks()
-
-		api.fetchMenu.mockResolvedValue(mockMenu)
-		api.createMenu.mockResolvedValue({})
-		api.updateMenu.mockResolvedValue({})
-		require("react-router-dom").useNavigate.mockReturnValue(mockNavigate)
 	})
 
 	test("renders create form by default", () => {
-		require("react-router-dom").useParams.mockReturnValue({})
-
-		render(
-			<Router>
-				<MenuForm />
-			</Router>
+		renderWithRoute(
+			<MenuForm />,
+			`/restaurants/${restaurantId}/menus/new`,
+			"/restaurants/:restaurantId/menus/new"
 		)
 
-		expect(screen.getByTestId("form-title")).toHaveTextContent("Create New Menu")
+		expect(screen.getByTestId("form-title")).toHaveTextContent(
+			"Create New Menu"
+		)
 		expect(screen.getByTestId("menu-name-input")).toHaveValue("")
 		expect(screen.getByTestId("submit-button")).toHaveTextContent("Create Menu")
 	})
 
-	test("renders edit form and loads menu data when id is provided", async () => {
-		require("react-router-dom").useParams.mockReturnValue({ id: "1" })
+	test("renders edit form and loads menu data when menuId is provided", async () => {
+		api.fetchMenu.mockResolvedValue(mockMenu)
 
-		render(
-			<Router>
-				<MenuForm />
-			</Router>
-		)
-
-		expect(screen.getByTestId("loading")).toBeInTheDocument()
-
-		await waitFor(() => {
-			expect(screen.queryByTestId("loading")).not.toBeInTheDocument()
+		await act(async () => {
+			renderWithRoute(
+				<MenuForm />,
+				`/restaurants/${restaurantId}/menus/1/edit`,
+				"/restaurants/:restaurantId/menus/:menuId/edit"
+			)
 		})
 
+		expect(await screen.findByDisplayValue("Lunch Menu")).toBeInTheDocument()
 		expect(screen.getByTestId("form-title")).toHaveTextContent("Edit Menu")
 		expect(screen.getByTestId("menu-name-input")).toHaveValue("Lunch Menu")
 		expect(screen.getByTestId("submit-button")).toHaveTextContent("Update Menu")
 	})
 
 	test("shows error when menu fetch fails in edit mode", async () => {
-		require("react-router-dom").useParams.mockReturnValue({ id: "1" })
 		api.fetchMenu.mockRejectedValue(new Error("Failed to load menu"))
 
-		render(
-			<Router>
-				<MenuForm />
-			</Router>
-		)
+		await act(async () => {
+			renderWithRoute(
+				<MenuForm />,
+				`/restaurants/${restaurantId}/menus/1/edit`,
+				"/restaurants/:restaurantId/menus/:menuId/edit"
+			)
+		})
 
 		await waitFor(() => {
 			expect(screen.getByTestId("error")).toBeInTheDocument()
@@ -98,12 +91,10 @@ describe("MenuForm Component", () => {
 	})
 
 	test("updates form data when user types in input field", () => {
-		require("react-router-dom").useParams.mockReturnValue({})
-
-		render(
-			<Router>
-				<MenuForm />
-			</Router>
+		renderWithRoute(
+			<MenuForm />,
+			`/restaurants/${restaurantId}/menus/new`,
+			"/restaurants/:restaurantId/menus/new"
 		)
 
 		const input = screen.getByTestId("menu-name-input")
@@ -113,61 +104,73 @@ describe("MenuForm Component", () => {
 	})
 
 	test("submits form and creates new menu", async () => {
-		require("react-router-dom").useParams.mockReturnValue({})
+		require("react-router-dom").useNavigate.mockReturnValue(mockNavigate)
+		api.createMenu.mockResolvedValue({ id: 111 })
 
-		render(
-			<Router>
-				<MenuForm />
-			</Router>
+		renderWithRoute(
+			<MenuForm />,
+			`/restaurants/${restaurantId}/menus/new`,
+			"/restaurants/:restaurantId/menus/new"
 		)
 
 		const input = screen.getByTestId("menu-name-input")
 		fireEvent.change(input, { target: { value: "New Test Menu" } })
+		fireEvent.click(screen.getByTestId("submit-button"))
 
-		const form = screen.getByTestId("menu-form")
-		fireEvent.submit(form)
-
-		expect(api.createMenu).toHaveBeenCalledWith({ name: "New Test Menu" })
+		expect(api.createMenu).toHaveBeenCalledWith("123", {
+			name: "New Test Menu",
+		})
 
 		await waitFor(() => {
-			expect(mockNavigate).toHaveBeenCalledWith("/menus")
+			expect(mockNavigate).toHaveBeenCalledWith(
+				`/restaurants/${restaurantId}/menus`
+			)
 		})
 	})
 
 	test("submits form and updates existing menu", async () => {
-		require("react-router-dom").useParams.mockReturnValue({ id: "1" })
+		api.fetchMenu.mockResolvedValue(mockMenu)
+		api.updateMenu.mockResolvedValue({})
 
-		render(
-			<Router>
-				<MenuForm />
-			</Router>
-		)
+		await act(async () => {
+			renderWithRoute(
+				<MenuForm />,
+				`/restaurants/${restaurantId}/menus/${mockMenu.id}/edit`,
+				"/restaurants/:restaurantId/menus/:menuId/edit"
+			)
+		})
 
 		await waitFor(() => {
 			expect(screen.queryByTestId("loading")).not.toBeInTheDocument()
+			expect(screen.getByTestId("menu-name-input")).toHaveValue(mockMenu.name)
 		})
 
 		const input = screen.getByTestId("menu-name-input")
 		fireEvent.change(input, { target: { value: "Updated Menu Name" } })
+		fireEvent.click(screen.getByTestId("submit-button"))
 
-		const form = screen.getByTestId("menu-form")
-		fireEvent.submit(form)
-
-		expect(api.updateMenu).toHaveBeenCalledWith("1", { name: "Updated Menu Name" })
+		expect(api.updateMenu).toHaveBeenCalledWith(
+			restaurantId.toString(),
+			mockMenu.id.toString(),
+			{
+				name: "Updated Menu Name",
+			}
+		)
 
 		await waitFor(() => {
-			expect(mockNavigate).toHaveBeenCalledWith("/menus")
+			expect(mockNavigate).toHaveBeenCalledWith(
+				`/restaurants/${restaurantId}/menus`
+			)
 		})
 	})
 
 	test("shows error when create menu fails", async () => {
-		require("react-router-dom").useParams.mockReturnValue({})
 		api.createMenu.mockRejectedValue(new Error("Failed to create menu"))
 
-		render(
-			<Router>
-				<MenuForm />
-			</Router>
+		renderWithRoute(
+			<MenuForm />,
+			`/restaurants/${restaurantId}/menus/new`,
+			"/restaurants/:restaurantId/menus/new"
 		)
 
 		const input = screen.getByTestId("menu-name-input")
@@ -184,21 +187,25 @@ describe("MenuForm Component", () => {
 	})
 
 	test("shows error when update menu fails", async () => {
-		require("react-router-dom").useParams.mockReturnValue({ id: "1" })
+		api.fetchMenu.mockResolvedValue(mockMenu)
 		api.updateMenu.mockRejectedValue(new Error("Failed to update menu"))
 
-		render(
-			<Router>
-				<MenuForm />
-			</Router>
-		)
+		await act(async () => {
+			renderWithRoute(
+				<MenuForm />,
+				`/restaurants/${restaurantId}/menus/${mockMenu.id}/edit`,
+				"/restaurants/:restaurantId/menus/:menuId/edit"
+			)
+		})
 
 		await waitFor(() => {
 			expect(screen.queryByTestId("loading")).not.toBeInTheDocument()
 		})
 
-		const form = screen.getByTestId("menu-form")
-		fireEvent.submit(form)
+		fireEvent.change(screen.getByTestId("menu-name-input"), {
+			target: { value: "Updated Menu Name" },
+		})
+		fireEvent.click(screen.getByTestId("submit-button"))
 
 		await waitFor(() => {
 			expect(screen.getByTestId("error")).toBeInTheDocument()
@@ -208,17 +215,88 @@ describe("MenuForm Component", () => {
 	})
 
 	test("navigates back to menus when cancel button is clicked", () => {
-		require("react-router-dom").useParams.mockReturnValue({})
+		require("react-router-dom").useNavigate.mockReturnValue(mockNavigate)
 
-		render(
-			<Router>
-				<MenuForm />
-			</Router>
+		renderWithRoute(
+			<MenuForm />,
+			`/restaurants/${restaurantId}/menus/new`,
+			"/restaurants/:restaurantId/menus/new"
 		)
 
 		const cancelButton = screen.getByTestId("cancel-button")
 		fireEvent.click(cancelButton)
 
-		expect(mockNavigate).toHaveBeenCalledWith("/menus")
+		expect(mockNavigate).toHaveBeenCalledWith(
+			`/restaurants/${restaurantId}/menus`
+		)
+	})
+
+	test("disables submit button while loading in edit mode", async () => {
+		// Mock a slow API call
+		let resolveApiCall
+		const apiPromise = new Promise((resolve) => {
+			resolveApiCall = resolve
+		})
+		api.updateMenu.mockReturnValue(apiPromise)
+		api.fetchMenu.mockResolvedValue(mockMenu)
+
+		await act(async () => {
+			renderWithRoute(
+				<MenuForm />,
+				`/restaurants/${restaurantId}/menus/${mockMenu.id}/edit`,
+				"/restaurants/:restaurantId/menus/:menuId/edit"
+			)
+		})
+
+		const submitButton = await screen.findByTestId("submit-button")
+		await waitFor(() => {
+			expect(submitButton).toBeDisabled()
+		})
+
+		resolveApiCall({ id: 111, name: "Test Updated Menu" })
+
+		await waitFor(() => {
+			expect(screen.getByTestId("submit-button")).not.toBeDisabled()
+		})
+	})
+
+	test("shows loading spinner on submit in create mode", async () => {
+		renderWithRoute(
+			<MenuForm />,
+			`/restaurants/${restaurantId}/menus/new`,
+			"/restaurants/:restaurantId/menus/new"
+		)
+
+		fireEvent.change(screen.getByTestId("menu-name-input"), {
+			target: { value: "Creating..." },
+		})
+
+		fireEvent.submit(screen.getByTestId("menu-form"))
+
+		expect(screen.getByTestId("submit-button")).toBeDisabled()
+		expect(screen.getByText("Saving...")).toBeInTheDocument()
+
+		await waitFor(() => {
+			expect(mockNavigate).toHaveBeenCalledWith(
+				`/restaurants/${restaurantId}/menus`
+			)
+		})
+	})
+
+	test("prevents submission if required fields are empty", async () => {
+		api.createMenu.mockResolvedValue({})
+
+		renderWithRoute(
+			<MenuForm />,
+			`/restaurants/${restaurantId}/menus/new`,
+			"/restaurants/:restaurantId/menus/new"
+		)
+
+		const form = screen.getByTestId("menu-form")
+		fireEvent.submit(form)
+
+		await waitFor(() => {
+			expect(api.createMenu).not.toHaveBeenCalled()
+		})
 	})
 })

@@ -22,7 +22,7 @@ function MenuList() {
 		}
 
 		getMenus()
-	}, [])
+	}, [restaurantId])
 
 	const handleDelete = async (id) => {
 		if (window.confirm("Are you sure you want to delete this menu?")) {
@@ -48,7 +48,7 @@ function MenuList() {
 			<div className="d-flex justify-content-between align-items-center mb-4">
 				<h2>Menus</h2>
 				<Link
-					to="/menus/new"
+					to={"/restaurants/" + restaurantId + "/menus/new"}
 					className="btn btn-primary"
 					data-testid="create-menu-btn"
 				>

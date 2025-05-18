@@ -35,6 +35,12 @@ function MenuForm() {
 
 	const handleSubmit = async (e) => {
 		e.preventDefault()
+
+		if (!formData.name || formData.name.trim() === "") {
+			setError("Menu name is required")
+			return
+		}
+
 		try {
 			setLoading(true)
 
@@ -44,14 +50,14 @@ function MenuForm() {
 				await createMenu(restaurantId, formData)
 			}
 
-			navigate("/restaurants/" + restaurantId + "/menus")
+			navigate(`/restaurants/${restaurantId}/menus`)
 		} catch (error) {
 			setError(`Failed to ${isEditing ? "update" : "create"} menu`)
 			setLoading(false)
 		}
 	}
 
-	if (loading && isEditing) {
+	if (loading && isEditing && !formData.name) {
 		return (
 			<div className="text-center mt-5" data-testid="loading">
 				<div className="spinner-border"></div>
@@ -94,9 +100,7 @@ function MenuForm() {
 						<button
 							type="button"
 							className="btn btn-outline-secondary"
-							onClick={() =>
-								navigate("/restaurants/" + restaurantId + "/menus")
-							}
+							onClick={() => navigate(`/restaurants/${restaurantId}/menus`)}
 							data-testid="cancel-button"
 						>
 							Cancel

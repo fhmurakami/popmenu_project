@@ -2,14 +2,14 @@ import React, { useState } from "react"
 import { deleteMenuItem } from "../../services/apiService"
 import MenuItemForm from "./MenuItemForm"
 
-function MenuItemList({ menuId, menuItems, onUpdateMenuItems }) {
+function MenuItemList({ restaurantId, menuId, menuItems, onUpdateMenuItems }) {
 	const [showAddItem, setShowAddItem] = useState(false)
 	const [error, setError] = useState(null)
 
 	const handleDeleteMenuItem = async (itemId) => {
 		if (window.confirm("Are you sure you want to delete this item?")) {
 			try {
-				await deleteMenuItem(menuId, itemId)
+				await deleteMenuItem(restaurantId, menuId, itemId)
 				const updatedItems = menuItems.filter((item) => item.id !== itemId)
 				onUpdateMenuItems(updatedItems)
 			} catch (error) {
@@ -45,7 +45,11 @@ function MenuItemList({ menuId, menuItems, onUpdateMenuItems }) {
 
 			{showAddItem && (
 				<div className="card-body border-bottom">
-					<MenuItemForm menuId={menuId} onSave={handleAddMenuItem} />
+					<MenuItemForm
+						restaurantId={restaurantId}
+						menuId={menuId}
+						onSave={handleAddMenuItem}
+					/>
 				</div>
 			)}
 
@@ -70,6 +74,7 @@ function MenuItemList({ menuId, menuItems, onUpdateMenuItems }) {
 											style: "currency",
 											currency: "USD",
 										}).format(item.price)}
+										{console.log(item)}
 									</small>
 								</div>
 								<div>
