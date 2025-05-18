@@ -22,7 +22,7 @@ jest.mock("react-router-dom", () => ({
 }))
 
 // Mock the MenuItemList component
-jest.mock("../MenuItem/MenuItemList", () => {
+jest.mock("../menu-item/MenuItemList", () => {
 	return ({ menuId, menuItems, onUpdateMenuItems }) => (
 		<div data-testid="mock-menu-item-list">
 			<span data-testid="menu-id">{menuId}</span>
@@ -42,7 +42,7 @@ jest.mock("../MenuItem/MenuItemList", () => {
 	)
 })
 
-import MenuDetail from "./MenuDetail"
+import MenuInfo from "./MenuInfo"
 import * as api from "../../services/apiService"
 
 jest.mock("../../services/apiService", () => ({
@@ -50,7 +50,7 @@ jest.mock("../../services/apiService", () => ({
 	deleteMenu: jest.fn(),
 }))
 
-describe("MenuDetail Component", () => {
+describe("MenuInfo Component", () => {
 	const mockMenu = {
 		id: 1,
 		name: "Lunch Menu",
@@ -74,7 +74,7 @@ describe("MenuDetail Component", () => {
 		api.fetchMenu.mockImplementation(() => new Promise(() => {}))
 
 		renderWithRoute(
-			<MenuDetail />,
+			<MenuInfo />,
 			"/restaurants/123/menus/1",
 			"/restaurants/:restaurantId/menus/:menuId"
 		)
@@ -84,7 +84,7 @@ describe("MenuDetail Component", () => {
 
 	it("renders menu details after successful fetch", async () => {
 		renderWithRoute(
-			<MenuDetail />,
+			<MenuInfo />,
 			"/restaurants/123/menus/1",
 			"/restaurants/:restaurantId/menus/:menuId"
 		)
@@ -104,7 +104,7 @@ describe("MenuDetail Component", () => {
 		api.fetchMenu.mockRejectedValue(new Error("Failed to load menu details"))
 
 		renderWithRoute(
-			<MenuDetail />,
+			<MenuInfo />,
 			"/restaurants/123/menus/1",
 			"/restaurants/:restaurantId/menus/:menuId"
 		)
@@ -120,7 +120,7 @@ describe("MenuDetail Component", () => {
 		api.fetchMenu.mockResolvedValue(null)
 
 		renderWithRoute(
-			<MenuDetail />,
+			<MenuInfo />,
 			"/restaurants/123/menus/1",
 			"/restaurants/:restaurantId/menus/:menuId"
 		)
@@ -137,7 +137,7 @@ describe("MenuDetail Component", () => {
 		jest.spyOn(window, "confirm").mockReturnValue(true)
 
 		renderWithRoute(
-			<MenuDetail />,
+			<MenuInfo />,
 			"/restaurants/123/menus/1",
 			"/restaurants/:restaurantId/menus/:menuId"
 		)
@@ -162,7 +162,7 @@ describe("MenuDetail Component", () => {
 		jest.spyOn(window, "confirm").mockReturnValue(true)
 
 		renderWithRoute(
-			<MenuDetail />,
+			<MenuInfo />,
 			"/restaurants/123/menus/1",
 			"/restaurants/:restaurantId/menus/:menuId"
 		)
@@ -186,7 +186,7 @@ describe("MenuDetail Component", () => {
 		jest.spyOn(window, "confirm").mockReturnValue(false)
 
 		renderWithRoute(
-			<MenuDetail />,
+			<MenuInfo />,
 			"/restaurants/123/menus/1",
 			"/restaurants/:restaurantId/menus/:menuId"
 		)
@@ -207,7 +207,7 @@ describe("MenuDetail Component", () => {
 	// MenuItemList integration tests
 	it("renders the MenuItemList component with correct props", async () => {
 		renderWithRoute(
-			<MenuDetail />,
+			<MenuInfo />,
 			"/restaurants/123/menus/1",
 			"/restaurants/:restaurantId/menus/:menuId"
 		)
@@ -232,7 +232,7 @@ describe("MenuDetail Component", () => {
 		})
 
 		renderWithRoute(
-			<MenuDetail />,
+			<MenuInfo />,
 			"/restaurants/123/menus/1",
 			"/restaurants/:restaurantId/menus/:menuId"
 		)
@@ -247,7 +247,7 @@ describe("MenuDetail Component", () => {
 
 	it("updates menu items when updateMenuItems function is called", async () => {
 		renderWithRoute(
-			<MenuDetail />,
+			<MenuInfo />,
 			"/restaurants/123/menus/1",
 			"/restaurants/:restaurantId/menus/:menuId"
 		)

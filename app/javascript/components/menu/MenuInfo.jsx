@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react"
 import { Link, useParams, useNavigate } from "react-router-dom"
 import { fetchMenu, deleteMenu } from "../../services/apiService"
-import MenuItemList from "../MenuItem/MenuItemList"
+import MenuItemList from "../menu-item/MenuItemList"
 
-function MenuDetail() {
+function MenuInfo() {
 	const { menuId, restaurantId } = useParams()
 	const navigate = useNavigate()
 	const [menu, setMenu] = useState(null)
@@ -110,4 +110,4 @@ function MenuDetail() {
 	)
 }
 
-export default MenuDetail
+export default MenuInfo
