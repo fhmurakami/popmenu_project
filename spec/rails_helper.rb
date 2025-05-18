@@ -1,7 +1,22 @@
 require 'simplecov'
 SimpleCov.start 'rails' do
-  add_filter [ '/app/channels', '/app/helpers', '/app/jobs', '/app/mailers', '/app/models/concerns' ]
+  add_filter [
+    '/app/channels',
+    '/app/helpers',
+    '/app/jobs',
+    '/app/mailers',
+    '/app/models/concerns'
+  ]
+
+  minimum_coverage 90
+  minimum_coverage_by_file 90
 end
+
+SimpleCov.at_exit do
+  SimpleCov.result.format!
+end
+
+
 
 # This file is copied to spec/ when you run 'rails generate rspec:install'
 require 'spec_helper'
