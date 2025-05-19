@@ -75,5 +75,26 @@ RSpec.describe Api::V1::RestaurantImportsController, type: :controller do
         file.unlink
       end
     end
+
+    context "when file processing raises an unexpected error" do
+      it "returns an internal server error" do
+        # Create a mock file that will raise an error when read
+        file_mock = instance_double(File)
+        allow(file_mock).to receive(:read).and_raise(StandardError.new("Test error"))
+
+        # Use the controller params directly instead of using fixture_file_upload
+        allow(controller).to receive(:params).and_return(
+          ActionController::Parameters.new(
+            file: file_mock
+          )
+        )
+
+        post :create
+
+        expect(response).to have_http_status(:internal_server_error)
+        expect(JSON.parse(response.body)['success']).to be false
+        expect(JSON.parse(response.body)['logs'].first['message']).to include('File processing error: Test error')
+      end
+    end
   end
 end

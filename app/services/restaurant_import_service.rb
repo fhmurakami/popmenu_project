@@ -48,8 +48,13 @@ class RestaurantImportService
     end
 
     # Find or create restaurant
-    restaurant = Restaurant.find_or_create_by(name: restaurant_data["name"])
-    log_info("Restaurant: #{restaurant.name} (#{restaurant.new_record? ? 'Created' : 'Found'})")
+    restaurant = Restaurant.find_or_initialize_by(name: restaurant_data["name"])
+
+    if restaurant.new_record? && restaurant.save
+      log_info("Restaurant: #{restaurant.name} (Created)")
+    else
+      log_info("Restaurant: #{restaurant.name} (Found)")
+    end
 
     # Process menus if present
     if restaurant_data.key?("menus") && restaurant_data["menus"].is_a?(Array)
@@ -70,8 +75,13 @@ class RestaurantImportService
     end
 
     # Find or create menu
-    menu = restaurant.menus.find_or_create_by(name: menu_data["name"])
-    log_info("Menu: #{menu.name} (#{menu.new_record? ? 'Created' : 'Found'})")
+    menu = restaurant.menus.find_or_initialize_by(name: menu_data["name"])
+
+    if menu.new_record? && menu.save
+      log_info("Menu: #{menu.name} (Created)")
+    else
+      log_info("Menu: #{menu.name} (Found)")
+    end
 
     # Process menu items
     menu_items = menu_data["menu_items"] || menu_data["dishes"] || []
@@ -98,9 +108,9 @@ class RestaurantImportService
     item_price = item_data["price"].to_f
 
     # Find or create menu item (keeping them unique in the database)
-    menu_item = MenuItem.find_or_create_by(name: item_name)
+    menu_item = MenuItem.find_or_initialize_by(name: item_name)
 
-    if menu_item.new_record?
+    if menu_item.new_record? && menu_item.save
       log_info("Menu item: #{item_name} (Created)")
     else
       log_info("Menu item: #{item_name} (Found existing)")

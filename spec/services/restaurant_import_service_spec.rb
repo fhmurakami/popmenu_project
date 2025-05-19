@@ -96,6 +96,78 @@ RSpec.describe RestaurantImportService do
         expect(lunch_price).to eq(9.0)
         expect(dinner_price).to eq(12.0)
       end
+
+      it 'handles menu entry with same price' do
+        # First import to create items
+        service.import(valid_json)
+
+        # Import the same data again to test when price is the same
+        result = service.import(valid_json)
+
+        expect(result[:success]).to be true
+        expect(result[:logs]).to include(
+          hash_including(level: 'info', message: including('Menu entry: Burger on lunch menu - price $9.0'))
+        )
+      end
+
+      context 'with new menu items' do
+        it 'logs creation of new menu items' do
+          # Clear any existing entry in database to ensure we're working with a fresh database
+          Restaurant.destroy_all
+          Menu.destroy_all
+          MenuEntry.destroy_all
+          MenuItem.destroy_all
+
+
+          # Import with a new menu item name
+          json = {
+            restaurants: [
+              {
+                name: "Test Restaurant",
+                menus: [
+                  {
+                    name: "lunch",
+                    menu_items: [
+                      { name: "Brand New Item", price: 15.0 }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }.to_json
+
+          result = service.import(json)
+
+          # Verify the log for menu item creation
+          expect(result[:logs]).to include(
+            hash_including(level: 'info', message: "Menu item: Brand New Item (Created)")
+          )
+
+          # Import another menu with another new item
+          second_json = {
+            restaurants: [
+              {
+                name: "Second Restaurant",
+                menus: [
+                  {
+                    name: "dinner",
+                    menu_items: [
+                      { name: "Another New Item", price: 20.0 }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }.to_json
+
+          result = service.import(second_json)
+
+          # Verify the log for the second menu item creation
+          expect(result[:logs]).to include(
+            hash_including(level: 'info', message: "Menu item: Another New Item (Created)")
+          )
+        end
+      end
     end
 
     context 'with invalid JSON data' do
@@ -234,6 +306,106 @@ RSpec.describe RestaurantImportService do
           expect(result[:success]).to be true
         }.to change(MenuItem, :count).by(2) # Only 2 unique items
           .and change(MenuEntry, :count).by(2) # Only 2 unique menu entries
+      end
+    end
+
+    context 'with database transaction errors' do
+      it 'handles general exceptions during import' do
+        restaurant_instance = instance_double(
+          Restaurant,
+          new_record?: true
+        )
+        allow(Restaurant).to receive(:find_or_initialize_by).and_return(restaurant_instance)
+        allow(restaurant_instance).to receive(:save).and_raise(StandardError.new('Test error'))
+
+        json = {
+          restaurants: [
+            {
+              name: "Test Restaurant",
+              menus: []
+            }
+          ]
+        }.to_json
+
+        result = service.import(json)
+
+        expect(result[:success]).to be false
+        expect(result[:logs]).to include(
+          hash_including(level: 'error', message: including('Import failed: Test error'))
+        )
+      end
+
+      it 'handles ActiveRecord::RecordInvalid exceptions during menu entry creation' do
+        # First create valid data
+        valid_json = {
+          restaurants: [
+            {
+              name: "Test Restaurant",
+              menus: [
+                {
+                  name: "lunch",
+                  menu_items: [
+                    { name: "Burger", price: 9.0 }
+                  ]
+                }
+              ]
+            }
+          ]
+        }.to_json
+
+        service.import(valid_json)
+
+        allow(MenuEntry).to receive(:find_or_create_by).and_raise(ActiveRecord::RecordInvalid.new(MenuEntry.new))
+
+        result = service.import(valid_json)
+
+        expect(result[:success]).to be false
+        expect(result[:logs]).to include(
+          hash_including(level: 'error', message: including('Failed to create menu entry'))
+        )
+      end
+    end
+
+    context 'with restaurant containing no menus' do
+      it 'logs a warning when no menus are found' do
+        json = {
+          restaurants: [
+            {
+              name: "Test Restaurant"
+              # No menus array
+            }
+          ]
+        }.to_json
+
+        result = service.import(json)
+
+        expect(result[:success]).to be true
+        expect(result[:logs]).to include(
+          hash_including(level: 'warning', message: including('No menus found for restaurant'))
+        )
+      end
+
+      it 'logs a warning when menu has no items' do
+        json = {
+          restaurants: [
+            {
+              name: "Test Restaurant",
+              menus: [
+                {
+                  name: "empty menu",
+                  menu_items: [] # Empty array
+                }
+              ]
+            }
+          ]
+        }.to_json
+
+        result = service.import(json)
+
+        expect(result[:success]).to be true
+        expect(result[:logs]).to include(
+          hash_including(level: 'warning', message: including('No menu items found for menu'))
+        )
       end
     end
   end
