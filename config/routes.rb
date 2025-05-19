@@ -6,6 +6,8 @@ Rails.application.routes.draw do
           resources :menu_items, as: :items, only: [ :index, :show, :create, :update, :destroy ]
         end
       end
+
+      resources :restaurant_imports, only: [ :create ]
     end
   end
 
