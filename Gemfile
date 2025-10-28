@@ -20,7 +20,7 @@ gem "cssbundling-rails"
 gem "jbuilder"
 # Tailwind CSS, a utility-first CSS framework [https://tailwindcss.com/]
 gem "tailwindcss-ruby", "~> 4.1"
-gem "tailwindcss-rails", "~> 4.2"
+gem "tailwindcss-rails", "~> 4.4"
 # Use Blueprinter as a JSON serializer
 gem "blueprinter"
 
